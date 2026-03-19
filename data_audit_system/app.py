@@ -2,6 +2,7 @@
 
 import streamlit as st # For file upload
 import pandas as pd 
+import numpy as np 
 
 
 # File upload - type - csv / xlsx - max size - 1000 mb
@@ -71,4 +72,3 @@ if file is not None: # after upload file is not none
 
 
 # data set overview ENDED 
-

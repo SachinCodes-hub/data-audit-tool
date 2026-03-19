@@ -43,20 +43,11 @@ if file is not None: # when we have a file
 
 
     st.write("unique value count" , df.nunique())
+    
+    
+    
+    
 #data overview of uploaded dataset is done. 
 
 
-
-
-
-#if st.button("Analyze Data Quality :"): # lets you add the button write all the analysis inside it as user hits the button code inside will get executed . 
-    
-    
-if st.button("Analyze Data Quality"):
-    # your analysis code here
-    st.write("analysing")
-
-
-
-# dataset analysis - 
-
+#ENDED 

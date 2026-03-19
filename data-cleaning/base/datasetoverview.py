@@ -1,7 +1,7 @@
 #required libraries - stream lit , pandas
 import streamlit as st
 import pandas as pd
-
+import numpy as np 
 # File upload - type - csv / xlsx - max size - 1000 mb
 file = st.file_uploader(
     "Upload file (CSV / XLSX)",
@@ -68,57 +68,234 @@ if file is not None: # after upload file is not none
     st.dataframe(df.nunique().rename("unique_count").reset_index())
 
 
-# data set overview ENDED 
+# data set overview ENDED -------------
+
+
+
+
+
+
+
+
+
+########################################################################################################################################################################################################
+
+
+
+
+
+
+
+
+
 
 
 
 # Faults in the dataset - DATA SET QUALITY SCORE 
 
-
 if st.button("Analyse Faults -"):
     st.header("Faults in the dataset -")
-    missing = df.null().sum()
-    st.subheader("Missing values" , missing)
-    missingpercent = ((missing)/len(df))*100
-    st.write("missing percent % - " , missingpercent)
-    
-    if missingpercent > 30 :
-        st.write("More than 30 pecent missing value ")
-        
-    
-    st.subheader("Duplicate rows ")
-    st.write("Duplicate rows" , df.duplicated().sum())
-    
-    
-    st.subheader("Data type issues" , pd.to_numeric(df[col] , errors = "coerce"))
-    # wrong datatypes
-    
-    #outliers 
-    
-    q1 = df.coloumns.quantile(0.25)
-    q3 = df.columns.quntile(0.75)
-    
-    IQR = q3 - q1
-    
-    # count outliers 
-    
-    #CONSTANT columns 
-    
-    st.subheader("constant columns(columns with same value)" , df.columns.nunique() ==1 )
-    
-    
-    
-    #correlation
-    st.subheader("correlation" , df.corr())
-    
-    
-    
-    #Data quality score 
-    
-    score = 100 # out of 100 
-    
-    st.subheader("DATAQUALITYSCORE")
-    
-    # data quality score calculation 
-    
-    
+
+    # ══════════════════════════════════════════════════════
+    # D1 — COMPLETENESS  (W = 0.28)
+    # ══════════════════════════════════════════════════════
+    placeholders = {"n/a","na","none","null","nil","-","--","?",
+                    "unknown","undefined","missing","tbd","tbc","#n/a"}
+
+    null_count = df.isnull().sum().sum()
+
+    empty_str = placeholder_count = whitespace_count = 0
+    for col in df.select_dtypes("object").columns:
+        vals = df[col].dropna().astype(str)
+        empty_str        += (vals.str.strip() == "").sum()
+        whitespace_count += vals.str.strip().eq("").sum() - (vals == "").sum()
+        placeholder_count += vals.str.strip().str.lower().isin(placeholders).sum()
+
+    total_missing = null_count + empty_str + whitespace_count + placeholder_count
+    missing_rate  = total_missing / (df.shape[0] * df.shape[1])
+    score_d1      = max(0, 100 - missing_rate * 100 * 1.5)
+
+    # ══════════════════════════════════════════════════════
+    # D2 — UNIQUENESS  (W = 0.18)
+    # ══════════════════════════════════════════════════════
+    exact_dupes = df.duplicated().sum()
+    dupe_rate   = exact_dupes / len(df)
+
+    dup_cols = []
+    cols = list(df.columns)
+    for i in range(len(cols)):
+        for j in range(i + 1, len(cols)):
+            if df[cols[i]].equals(df[cols[j]]):
+                dup_cols.append((cols[i], cols[j]))
+
+    constant_cols = [c for c in df.columns if df[c].nunique(dropna=True) <= 1]
+
+    score_d2 = max(0, 100 - dupe_rate * 100 * 2)
+
+    # ══════════════════════════════════════════════════════
+    # D3 — CONSISTENCY  (W = 0.16)
+    # ══════════════════════════════════════════════════════
+    mixed_type_cols = []
+    case_issue_cols = []
+    encoding_issues = []
+
+    for col in df.select_dtypes("object").columns:
+        vals = df[col].dropna()
+        if len(vals) == 0:
+            continue
+
+        numeric = pd.to_numeric(vals, errors="coerce").notnull().sum()
+        strings = vals.astype(str).str.match(r"^[A-Za-z]").sum()
+        if 0 < numeric < len(vals) and strings > 0:
+            mixed_type_cols.append(col)
+
+        if df[col].nunique() <= 100:
+            orig  = vals.astype(str).str.strip().nunique()
+            lower = vals.astype(str).str.strip().str.lower().nunique()
+            if lower < orig:
+                case_issue_cols.append(col)
+
+        weird = vals.astype(str).str.contains(
+            r"[^\x00-\x7F]|â€|Ã©|Ã¨", regex=True, na=False).sum()
+        if weird > 0:
+            encoding_issues.append(col)
+
+    total_issue_cols = len(mixed_type_cols) + len(case_issue_cols) + len(encoding_issues)
+    issue_rate       = total_issue_cols / df.shape[1]
+    score_d3         = max(0, 100 - issue_rate * 100 * 1.8)
+
+    # ══════════════════════════════════════════════════════
+    # D4 — VALIDITY  (W = 0.16)
+    # ══════════════════════════════════════════════════════
+    outlier_cols = []
+    impossible   = []
+
+    for col in df.select_dtypes("number").columns:
+        data = df[col].dropna()
+        if len(data) < 4:
+            continue
+        Q1, Q3 = data.quantile(0.25), data.quantile(0.75)
+        IQR = Q3 - Q1
+        if IQR > 0:
+            n_out = ((data < Q1 - 3*IQR) | (data > Q3 + 3*IQR)).sum()
+            if n_out > 0:
+                outlier_cols.append({"col": col, "count": int(n_out)})
+
+        c = col.lower()
+        if any(k in c for k in ["age","years"]) and ((data < 0) | (data > 150)).sum():
+            impossible.append(col)
+        if any(k in c for k in ["price","salary","cost","amount"]) and (data < 0).sum():
+            impossible.append(col)
+        if any(k in c for k in ["percent","pct","rate"]) and ((data < 0) | (data > 100)).sum():
+            impossible.append(col)
+
+    total_num_cells = sum(df[c].dropna().shape[0] for c in df.select_dtypes("number").columns)
+    outlier_rate    = sum(o["count"] for o in outlier_cols) / max(1, total_num_cells)
+    impossible_rate = len(impossible) / max(1, len(df))
+    score_d4        = max(0, 100 - outlier_rate * 60 - impossible_rate * 100)
+
+    # ══════════════════════════════════════════════════════
+    # D5 — ACCURACY  (W = 0.10)
+    # ══════════════════════════════════════════════════════
+    skewed_cols = []
+    imbalanced  = []
+
+    for col in df.select_dtypes("number").columns:
+        sk = df[col].dropna().skew()
+        if abs(sk) > 2.0:
+            skewed_cols.append({"col": col, "skewness": round(float(sk), 3)})
+
+    for col in df.select_dtypes("object").columns:
+        vc = df[col].value_counts(normalize=True)
+        if len(vc) >= 2 and float(vc.iloc[0]) > 0.85:
+            imbalanced.append(col)
+
+    skew_penalty      = sum(min(abs(s["skewness"]) / 20, 0.05) for s in skewed_cols)
+    cat_cols          = df.select_dtypes("object").shape[1]
+    imbalance_penalty = (len(imbalanced) / cat_cols * 20) if cat_cols > 0 else 0
+    score_d5          = max(0, 100 - skew_penalty * 100 - imbalance_penalty)
+
+    # ══════════════════════════════════════════════════════
+    # D6 — STRUCTURE  (W = 0.07)
+    # ══════════════════════════════════════════════════════
+    import re
+
+    bad_col_names   = []
+    wrong_type_cols = []
+
+    for col in df.columns:
+        s = str(col)
+        if s.strip() == "" or re.match(r"^Unnamed", s) or re.search(r"[^a-zA-Z0-9_ ]", s):
+            bad_col_names.append(col)
+
+    for col in df.select_dtypes("object").columns:
+        if pd.to_numeric(df[col], errors="coerce").notnull().mean() > 0.95:
+            wrong_type_cols.append(col)
+
+    empty_rows    = int(df.isnull().all(axis=1).sum())
+    row_col_ratio = df.shape[0] / df.shape[1]
+    ratio_penalty = 10 if row_col_ratio < 5 else 0
+
+    struct_penalty = (len(bad_col_names) + len(wrong_type_cols)) / df.shape[1] * 30
+    score_d6       = max(0, 100 - struct_penalty - ratio_penalty)
+
+    # ══════════════════════════════════════════════════════
+    # D7 — CORRELATION  (W = 0.05)
+    # ══════════════════════════════════════════════════════
+    high_corr_pairs = []
+    redundant_cols  = []
+
+    num_df = df.select_dtypes("number").dropna(axis=1, how="all")
+    if num_df.shape[1] >= 2:
+        corr = num_df.corr().abs()
+        c    = corr.columns
+        for i in range(len(c)):
+            for j in range(i + 1, len(c)):
+                r = float(corr.iloc[i, j])
+                if r > 0.95:
+                    high_corr_pairs.append({"col_a": c[i], "col_b": c[j], "r": round(r, 4)})
+                if r > 0.999:
+                    redundant_cols.append(c[j])
+
+    score_d7 = max(0, 100 - len(high_corr_pairs) * 3)
+
+    # ══════════════════════════════════════════════════════
+    # FINAL — DATASET QUALITY SCORE (DQS)
+    # ══════════════════════════════════════════════════════
+    WEIGHTS = {
+        "completeness": 0.28,
+        "uniqueness":   0.18,
+        "consistency":  0.16,
+        "validity":     0.16,
+        "accuracy":     0.10,
+        "structure":    0.07,
+        "correlation":  0.05,
+    }
+
+    scores = {
+        "completeness": score_d1,
+        "uniqueness":   score_d2,
+        "consistency":  score_d3,
+        "validity":     score_d4,
+        "accuracy":     score_d5,
+        "structure":    score_d6,
+        "correlation":  score_d7,
+    }
+
+    raw_score       = sum(WEIGHTS[k] * scores[k] for k in WEIGHTS)
+    size_factor     = max(0.5, min(1.0, np.log10(len(df) + 1) / 4.0))
+    diversity_bonus = min(1.05, 1 + (df.dtypes.nunique() - 1) * 0.01)
+
+    DQS = round(min(100, max(0, raw_score * size_factor * diversity_bonus)), 2)
+
+    st.write(f"D1 Completeness : {round(score_d1, 2)}")
+    st.write(f"D2 Uniqueness   : {round(score_d2, 2)}")
+    st.write(f"D3 Consistency  : {round(score_d3, 2)}")
+    st.write(f"D4 Validity     : {round(score_d4, 2)}")
+    st.write(f"D5 Accuracy     : {round(score_d5, 2)}")
+    st.write(f"D6 Structure    : {round(score_d6, 2)}")
+    st.write(f"D7 Correlation  : {round(score_d7, 2)}")
+    st.write(f"Raw Score       : {round(raw_score, 2)}")
+    st.write(f"Size Factor     : {size_factor}")
+    st.write(f"Diversity Bonus : {diversity_bonus}")
+    st.write(f"DQS             : {DQS} / 100")
