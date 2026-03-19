@@ -8,9 +8,33 @@ file = st.file_uploader("Upload file (csv , xlsx)" , type =["csv" , "xlsx"] , he
 
 # user ----- CSV file as input .
 
-#dataset cleaning , handellingm unwanted errors -
+#dataset cleaning , handelling unwanted errors -
 
+#data overview - 
+📌 Dataset Overview
 
+📂 File Info
+- Name
+- Size
+
+📊 Shape
+- Rows
+- Columns
+
+🧾 Columns
+(list)
+
+👀 Preview
+(table)
+
+📊 Data Types
+(table)
+
+📈 Statistics
+(table)
+
+🔢 Unique Values
+(table)
 #file uploaded or not - confirmation
 
 if file is not None:
@@ -18,7 +42,7 @@ if file is not None:
 else :
     st.failed("File is not uploaded yet!!")
 
-
+    
 
 # created pandas dataframe for analysis 
 if file.name is not None:
@@ -28,9 +52,9 @@ if file.name is not None:
         df = df.read_excel(file)
 
 
-# show user dataset- preview
+# dataset overview - 
 
-st.dataframe(df.head()) # first 5 rows of dataset
+st.dataframe(df.head()) # first 5 rows 
 st.dataframe(df.tail()) # last 5 rows 
 
 # show user some basic infomation - 
@@ -38,6 +62,25 @@ st.write("uploaded file name" , file.name)
 st.write("uploaded file size" , file.size)
 st.write("shape of dataset -" , df.shape())
 st.write("Coloumns -" , df.columns)
-
+st.write("datatypes in dataset" , df.dtypes)
 st.write("No of rows ", len(df))
+
+st.write("memory usage" , df.memory_usage())
+
+st.write("statistical summary" , df.describe())
+
 # we have pandas dataframe till now 
+
+
+
+
+# Button - for analysis 
+
+if st.button("Analyze Data Quality :"):
+    
+
+
+
+
+# dataset analysis - 
+
