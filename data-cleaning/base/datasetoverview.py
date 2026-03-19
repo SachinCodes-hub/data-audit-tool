@@ -96,9 +96,9 @@ if file is not None: # after upload file is not none
 if st.button("Analyse Faults -"):
     st.header("Faults in the dataset -")
 
-    # ══════════════════════════════════════════════════════
-    # D1 — COMPLETENESS  (W = 0.28)
-    # ══════════════════════════════════════════════════════
+    
+    # COMPLETENESS  (W = 0.28)
+    
     placeholders = {"n/a","na","none","null","nil","-","--","?",
                     "unknown","undefined","missing","tbd","tbc","#n/a"}
 
@@ -115,9 +115,9 @@ if st.button("Analyse Faults -"):
     missing_rate  = total_missing / (df.shape[0] * df.shape[1])
     score_d1      = max(0, 100 - missing_rate * 100 * 1.5)
 
-    # ══════════════════════════════════════════════════════
+   
     # D2 — UNIQUENESS  (W = 0.18)
-    # ══════════════════════════════════════════════════════
+    
     exact_dupes = df.duplicated().sum()
     dupe_rate   = exact_dupes / len(df)
 
@@ -134,7 +134,7 @@ if st.button("Analyse Faults -"):
 
     # ══════════════════════════════════════════════════════
     # D3 — CONSISTENCY  (W = 0.16)
-    # ══════════════════════════════════════════════════════
+
     mixed_type_cols = []
     case_issue_cols = []
     encoding_issues = []
