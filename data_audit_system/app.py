@@ -299,6 +299,49 @@ if st.button("Analyse Faults -"):
     st.write(f"DQS             : {DQS} / 100")
     
     
+    # ==============================
+    # 🔥 ADDED: DATA VISUALIZATION
+    # ==============================
+    
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+
+    st.header("Data Visualization")
+
+    # 🔹 Missing Values Plot
+    st.subheader("Missing Values per Column")
+    plt.figure()
+    df.isnull().sum().plot(kind='bar')
+    plt.title("Missing Values")
+    st.pyplot(plt)
+
+    # 🔹 Distribution Plot
+    st.subheader("Distribution of Numerical Columns")
+    num_cols = df.select_dtypes(include=np.number).columns
+
+    for col in num_cols[:3]:  # limit to 3 columns
+        plt.figure()
+        df[col].hist()
+        plt.title(f"Distribution of {col}")
+        st.pyplot(plt)
+
+    # 🔹 Correlation Heatmap
+    st.subheader("Correlation Heatmap")
+    num_df = df.select_dtypes(include=np.number)
+
+    if num_df.shape[1] > 1:
+        plt.figure()
+        sns.heatmap(num_df.corr(), annot=True)
+        st.pyplot(plt)
+
+    # 🔹 Boxplot (Outlier Detection)
+    st.subheader("Boxplot for Outliers")
+    for col in num_cols[:3]:
+        plt.figure()
+        df.boxplot(column=col)
+        plt.title(f"Boxplot of {col}")
+        st.pyplot(plt)
+    
 
 
 
