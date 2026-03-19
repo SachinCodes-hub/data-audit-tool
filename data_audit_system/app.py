@@ -11,5 +11,6 @@ file = st.file_uploader("Upload file (csv , xlsx)" , type =["csv" , "xlsx"] , he
 
 #FILE UPLOAD ENDED 
 
-#add when can handle multiple dataset . 
+#For multiple files - 
+
 #Multiple files upload - multifile = st.file_uploader("upload CSV , XLSX" , type = ["csv" , "xlsx"] , accept_multiple_files = True )
