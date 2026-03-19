@@ -53,24 +53,35 @@ if file.name is not None:
 
 
 # dataset overview - 
+st.write("#Dataset Overview -")
+st.write("file info -")
+st.write("uploaded file name" , file.name)
+st.write("uploaded file size" , file.size)
+
+st.write("file shape - ")
+st.write("shape of dataset -" , df.shape())
+st.write("Coloumns -" , df.columns)
+st.write("No of rows ", len(df))
+
+st.write("preview - ")
 
 st.dataframe(df.head()) # first 5 rows 
 st.dataframe(df.tail()) # last 5 rows 
 
-# show user some basic infomation - 
-st.write("uploaded file name" , file.name)
-st.write("uploaded file size" , file.size)
-st.write("shape of dataset -" , df.shape())
-st.write("Coloumns -" , df.columns)
+
+st.write("Data types - ")
 st.write("datatypes in dataset" , df.dtypes)
-st.write("No of rows ", len(df))
 
-st.write("memory usage" , df.memory_usage())
-
+st.write("statistics - ")
 st.write("statistical summary" , df.describe())
 
-# we have pandas dataframe till now 
 
+st.write("Memory used - ")
+st.write("memory usage" , df.memory_usage())
+
+
+
+#data overview of uploaded dataset is done. 
 
 
 
