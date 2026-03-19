@@ -1,8 +1,6 @@
-#FILE UPLOAD CODE 1 
-
-import streamlit as st # For file upload
-import pandas as pd 
-
+#required libraries - stream lit , pandas
+import streamlit as st
+import pandas as pd
 
 # File upload - type - csv / xlsx - max size - 1000 mb
 file = st.file_uploader(
@@ -57,7 +55,7 @@ if file is not None: # after upload file is not none
     st.write("Last 5 rows")
     st.dataframe(df.tail())
 
-    st.subheader("Data Types") # zeciton 4
+    st.subheader("Data Types") # seciton 4
     st.dataframe(df.dtypes.rename("dtype").reset_index())
 
     st.subheader("Statistical Summary") # section 5
