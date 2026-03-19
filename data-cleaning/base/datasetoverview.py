@@ -70,3 +70,55 @@ if file is not None: # after upload file is not none
 
 # data set overview ENDED 
 
+
+
+# Faults in the dataset - DATA SET QUALITY SCORE 
+
+
+if st.button("Analyse Faults -"):
+    st.header("Faults in the dataset -")
+    missing = df.null().sum()
+    st.subheader("Missing values" , missing)
+    missingpercent = ((missing)/len(df))*100
+    st.write("missing percent % - " , missingpercent)
+    
+    if missingpercent > 30 :
+        st.write("More than 30 pecent missing value ")
+        
+    
+    st.subheader("Duplicate rows ")
+    st.write("Duplicate rows" , df.duplicated().sum())
+    
+    
+    st.subheader("Data type issues" , pd.to_numeric(df[col] , errors = "coerce"))
+    # wrong datatypes
+    
+    #outliers 
+    
+    q1 = df.coloumns.quantile(0.25)
+    q3 = df.columns.quntile(0.75)
+    
+    IQR = q3 - q1
+    
+    # count outliers 
+    
+    #CONSTANT columns 
+    
+    st.subheader("constant columns(columns with same value)" , df.columns.nunique() ==1 )
+    
+    
+    
+    #correlation
+    st.subheader("correlation" , df.corr())
+    
+    
+    
+    #Data quality score 
+    
+    score = 100 # out of 100 
+    
+    st.subheader("DATAQUALITYSCORE")
+    
+    # data quality score calculation 
+    
+    
