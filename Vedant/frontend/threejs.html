@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<!--
+  DATA AUDIT SYSTEM — threejs.html
+  ══════════════════════════════════════════════════════
+  Injected via st.components.v1.html(height=0)
+  All DOM manipulation targets parent.document so it
+  escapes the Streamlit iframe and applies to the main page.
+
+  Contains:
+    1. Three.js WebGL particle field + floating wireframe shapes
+    2. Animated score ring (Canvas 2D)
+    3. Particle burst on upload
+    4. Animated sparklines (Canvas 2D)
+    5. Mouse cursor glow
+  ══════════════════════════════════════════════════════
+-->
+<html>
+<head>
+<style>
+  html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; width: 100%; height: 1px; }
+</style>
+</head>
+<body>
+
+<!-- Three.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   SETUP — escape to parent page
+════════════════════════════════════════════════════════════ */
+var PD = parent.document;
+var PW = parent.window;
+var W  = PW.innerWidth;
+var H  = PW.innerHeight;
+
+/* ════════════════════════════════════════════════════════════
+   1. THREE.JS — WebGL renderer + particles + shapes
+════════════════════════════════════════════════════════════ */
+var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(PW.devicePixelRatio, 2));
+renderer.setSize(W, H);
+
+var cvs = renderer.domElement;
+cvs.id  = 'das-webgl-canvas';
+cvs.style.cssText = [
+  'position:fixed', 'top:0', 'left:0',
+  'width:100vw', 'height:100vh',
+  'z-index:0', 'pointer-events:none'
+].join(';');
+PD.body.appendChild(cvs);
+
+var scene  = new THREE.Scene();
+var camera = new THREE.PerspectiveCamera(60, W / H, 0.1, 2000);
+camera.position.z = 600;
+
+/* ── 2200 colored particles ── */
+var N   = 2200;
+var geo = new THREE.BufferGeometry();
+var pos = new Float32Array(N * 3);
+var col = new Float32Array(N * 3);
+var COLS = [
+  [0.24, 0.50, 1.00],   /* blue    */
+  [0.55, 0.36, 0.96],   /* violet  */
+  [0.04, 0.71, 0.83],   /* cyan    */
+  [0.06, 0.73, 0.51],   /* green   */
+  [0.96, 0.62, 0.07],   /* amber   */
+  [0.93, 0.29, 0.60],   /* pink    */
+];
+for (var i = 0; i < N; i++) {
+  var i3 = i * 3;
+  var c  = COLS[Math.floor(Math.random() * COLS.length)];
+  pos[i3]     = (Math.random() - 0.5) * 1800;
+  pos[i3 + 1] = (Math.random() - 0.5) * 1400;
+  pos[i3 + 2] = (Math.random() - 0.5) * 1000;
+  col[i3]     = c[0];
+  col[i3 + 1] = c[1];
+  col[i3 + 2] = c[2];
+}
+geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+geo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
+
+var pmat = new THREE.PointsMaterial({
+  size: 1.7,
+  vertexColors: true,
+  transparent: true,
+  opacity: 0.45,
+  sizeAttenuation: true,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+});
+var pts = new THREE.Points(geo, pmat);
+scene.add(pts);
+
+/* ── Glowing grid plane ── */
+var gridPts = [];
+for (var x = -800; x <= 800; x += 140) { gridPts.push(x, -700, -600, x,  700, -600); }
+for (var y = -700; y <= 700; y += 120) { gridPts.push(-800, y, -600, 800,  y, -600); }
+var gridGeo = new THREE.BufferGeometry();
+gridGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(gridPts), 3));
+scene.add(new THREE.LineSegments(
+  gridGeo,
+  new THREE.LineBasicMaterial({ color: 0x0a1530, transparent: true, opacity: 0.35 })
+));
+
+/* ── 6 floating wireframe shapes ── */
+var floatShapes  = [];
+var shapeGeos    = [
+  new THREE.OctahedronGeometry(18),
+  new THREE.TetrahedronGeometry(16),
+  new THREE.IcosahedronGeometry(14),
+];
+var shapeColors  = [0x3d7fff, 0x8b5cf6, 0x06b6d4, 0x10b981];
+for (var k = 0; k < 6; k++) {
+  var smat  = new THREE.MeshBasicMaterial({ color: shapeColors[k % 4], wireframe: true, transparent: true, opacity: 0.12 });
+  var smesh = new THREE.Mesh(shapeGeos[k % 3], smat);
+  smesh.position.set(
+    (Math.random() - 0.5) * 1200,
+    (Math.random() - 0.5) * 900,
+    (Math.random() - 0.5) * 400 - 200
+  );
+  smesh._spd = {
+    rx: Math.random() * 0.008,
+    ry: Math.random() * 0.012,
+    rz: Math.random() * 0.006,
+  };
+  scene.add(smesh);
+  floatShapes.push(smesh);
+}
+
+/* ── Mouse parallax ── */
+var mouse = { x: 0, y: 0 };
+PD.addEventListener('mousemove', function (e) {
+  mouse.x = (e.clientX / W - 0.5) * 2;
+  mouse.y = (e.clientY / H - 0.5) * 2;
+});
+
+/* ── Animation loop ── */
+var clock = new THREE.Clock();
+(function loop() {
+  requestAnimationFrame(loop);
+  var t = clock.getElapsedTime();
+
+  pts.rotation.y = t * 0.014;
+  pts.rotation.x = Math.sin(t * 0.007) * 0.08;
+
+  camera.position.x += (mouse.x * 28 - camera.position.x) * 0.04;
+  camera.position.y += (-mouse.y * 18 - camera.position.y) * 0.04;
+  camera.lookAt(scene.position);
+
+  pmat.opacity = 0.38 + Math.sin(t * 0.3) * 0.10;
+
+  floatShapes.forEach(function (s) {
+    s.rotation.x += s._spd.rx;
+    s.rotation.y += s._spd.ry;
+    s.rotation.z += s._spd.rz;
+  });
+
+  renderer.render(scene, camera);
+})();
+
+/* ── Resize ── */
+PW.addEventListener('resize', function () {
+  W = PW.innerWidth; H = PW.innerHeight;
+  camera.aspect = W / H;
+  camera.updateProjectionMatrix();
+  renderer.setSize(W, H);
+});
+
+
+/* ════════════════════════════════════════════════════════════
+   2. CURSOR GLOW
+════════════════════════════════════════════════════════════ */
+var glow = PD.createElement('div');
+glow.id  = 'das-cursor-glow';
+glow.style.cssText = [
+  'position:fixed', 'width:400px', 'height:400px',
+  'border-radius:50%', 'pointer-events:none', 'z-index:1',
+  'transition:opacity .4s',
+  'background:radial-gradient(circle, rgba(61,127,255,.05) 0%, transparent 70%)',
+  'transform:translate(-50%,-50%)', 'opacity:0'
+].join(';');
+PD.body.appendChild(glow);
+PD.addEventListener('mousemove',  function (e) { glow.style.left = e.clientX + 'px'; glow.style.top = e.clientY + 'px'; glow.style.opacity = '1'; });
+PD.addEventListener('mouseleave', function ()  { glow.style.opacity = '0'; });
+
+
+/* ════════════════════════════════════════════════════════════
+   3. PARTICLE BURST  —  call: parent.window._burst(cx, cy)
+════════════════════════════════════════════════════════════ */
+PW._burst = function (cx, cy) {
+  var BURST  = 80;
+  var colors = ['#3d7fff','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ec4899'];
+  var particles = [];
+
+  for (var i = 0; i < BURST; i++) {
+    var el    = PD.createElement('div');
+    var angle = Math.random() * Math.PI * 2;
+    var speed = 60 + Math.random() * 140;
+    var size  = 2 + Math.random() * 4;
+    var c     = colors[Math.floor(Math.random() * colors.length)];
+    el.style.cssText = [
+      'position:fixed', 'border-radius:50%', 'pointer-events:none', 'z-index:9999',
+      'width:' + size + 'px', 'height:' + size + 'px',
+      'background:' + c,
+      'left:' + cx + 'px', 'top:' + cy + 'px',
+      'box-shadow:0 0 ' + (size * 2) + 'px ' + c,
+    ].join(';');
+    PD.body.appendChild(el);
+    particles.push({ el: el, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 1, x: cx, y: cy });
+  }
+
+  var last = performance.now();
+  (function tick(now) {
+    var dt = (now - last) / 1000; last = now;
+    var alive = false;
+    particles.forEach(function (p) {
+      if (p.life <= 0) return;
+      alive   = true;
+      p.x    += p.vx * dt;
+      p.y    += p.vy * dt;
+      p.vy   += 200 * dt;    /* gravity */
+      p.life -= dt * 1.5;
+      p.el.style.left      = p.x + 'px';
+      p.el.style.top       = p.y + 'px';
+      p.el.style.opacity   = Math.max(0, p.life);
+      p.el.style.transform = 'scale(' + Math.max(0, p.life) + ')';
+      if (p.life <= 0) p.el.remove();
+    });
+    if (alive) requestAnimationFrame(tick);
+  })(performance.now());
+};
+
+
+/* ════════════════════════════════════════════════════════════
+   4. ANIMATED SCORE RING
+   Call: parent.window._drawRing(score, hexColor)
+════════════════════════════════════════════════════════════ */
+PW._drawRing = function (score, color) {
+  var container = PD.getElementById('score-ring-container');
+  if (!container) return;
+
+  var old = PD.getElementById('score-ring-canvas');
+  if (old) old.remove();
+
+  var size = 180;
+  var c    = PD.createElement('canvas');
+  c.id     = 'score-ring-canvas';
+  c.width  = size * 2;
+  c.height = size * 2;
+  c.style.cssText = 'width:' + size + 'px;height:' + size + 'px;position:absolute;top:0;left:0;';
+  container.appendChild(c);
+
+  var ctx    = c.getContext('2d');
+  var cx     = size, cy = size, r = size - 16;
+  var start  = -Math.PI / 2;
+  var target = 2 * Math.PI * (score / 100);
+  var t      = 0;
+
+  /* hex → "r,g,b" */
+  var hexToRgb = function (h) {
+    return parseInt(h.slice(1,3), 16) + ',' +
+           parseInt(h.slice(3,5), 16) + ',' +
+           parseInt(h.slice(5,7), 16);
+  };
+  var rgb = hexToRgb(color);
+
+  (function anim() {
+    t   = Math.min(t + 0.025, 1);
+    var ease = 1 - Math.pow(1 - t, 3);
+    var end  = start + target * ease;
+
+    ctx.clearRect(0, 0, size * 2, size * 2);
+
+    /* track */
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgba(255,255,255,.06)';
+    ctx.lineWidth   = 10;
+    ctx.stroke();
+
+    /* arc */
+    var grd = ctx.createLinearGradient(0, 0, size * 2, size * 2);
+    grd.addColorStop(0, color);
+    grd.addColorStop(1, 'rgba(' + rgb + ',.4)');
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, start, end);
+    ctx.strokeStyle  = grd;
+    ctx.lineWidth    = 10;
+    ctx.lineCap      = 'round';
+    ctx.shadowBlur   = 20;
+    ctx.shadowColor  = color;
+    ctx.stroke();
+
+    /* tick marks */
+    for (var i = 0; i < 100; i++) {
+      var a     = start + 2 * Math.PI * (i / 100);
+      var inner = r - 6;
+      var outer = r + (i % 10 === 0 ? 10 : 5);
+      ctx.beginPath();
+      ctx.moveTo(cx + inner * Math.cos(a), cy + inner * Math.sin(a));
+      ctx.lineTo(cx + outer * Math.cos(a), cy + outer * Math.sin(a));
+      ctx.strokeStyle = (i / 100 <= (score / 100) * ease) ? color : 'rgba(255,255,255,.08)';
+      ctx.lineWidth   = i % 10 === 0 ? 2 : 1;
+      ctx.shadowBlur  = 0;
+      ctx.stroke();
+    }
+
+    if (t < 1) requestAnimationFrame(anim);
+  })();
+};
+
+
+/* ════════════════════════════════════════════════════════════
+   5. SPARKLINES
+   Call: parent.window._sparkline(canvasId, dataArray, hexColor)
+════════════════════════════════════════════════════════════ */
+PW._sparkline = function (canvasId, data, color) {
+  var c = PD.getElementById(canvasId);
+  if (!c) return;
+  var ctx = c.getContext('2d');
+  var w = c.width, h = c.height;
+  ctx.clearRect(0, 0, w, h);
+  if (!data || data.length < 2) return;
+
+  var min   = Math.min.apply(null, data);
+  var max   = Math.max.apply(null, data);
+  var range = max - min || 1;
+  var sx    = function (i) { return i / (data.length - 1) * w; };
+  var sy    = function (v) { return h - (v - min) / range * (h - 8) - 4; };
+
+  /* gradient fill */
+  var grd = ctx.createLinearGradient(0, 0, 0, h);
+  grd.addColorStop(0, color + '55');
+  grd.addColorStop(1, color + '00');
+  ctx.beginPath();
+  ctx.moveTo(sx(0), h);
+  data.forEach(function (v, i) { ctx.lineTo(sx(i), sy(v)); });
+  ctx.lineTo(sx(data.length - 1), h);
+  ctx.closePath();
+  ctx.fillStyle = grd;
+  ctx.fill();
+
+  /* line */
+  ctx.beginPath();
+  data.forEach(function (v, i) { i === 0 ? ctx.moveTo(sx(i), sy(v)) : ctx.lineTo(sx(i), sy(v)); });
+  ctx.strokeStyle = color;
+  ctx.lineWidth   = 2;
+  ctx.lineJoin    = 'round';
+  ctx.stroke();
+
+  /* end dots */
+  ctx.fillStyle   = color;
+  ctx.shadowBlur  = 8;
+  ctx.shadowColor = color;
+  [0, data.length - 1].forEach(function (i) {
+    ctx.beginPath();
+    ctx.arc(sx(i), sy(data[i]), 3, 0, 2 * Math.PI);
+    ctx.fill();
+  });
+};
+
+/* Signal ready */
+setTimeout(function () { PW._dasReady = true; }, 800);
+</script>
+
+</body>
+</html>
