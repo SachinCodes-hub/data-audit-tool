@@ -1,4 +1,4 @@
-# ◈ Data Audit System v3.0
+# ◈ Data Audit System
 
 Professional data quality analysis platform built with Streamlit.
 
