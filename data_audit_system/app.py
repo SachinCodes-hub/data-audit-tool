@@ -1,6 +1,4 @@
-#navigation 
-
-
+# navigation of all files
 import streamlit as st
 from utils.helpers import load_file
 from modules.overview import show_overview
@@ -44,25 +42,27 @@ if uploaded is None:
     col3.success("**🧹 Phase 3**\nAutomated 8-step cleaning pipeline")
 
 else:
-    # ── Load file with error handling ─────────────────────────────
     try:
         df = load_file(uploaded)
-    except Exception as e:
-        st.error(f"❌ Failed to read file: {e}")
+
+    except ValueError as e:
+        st.error(f"❌ {e}")
         st.stop()
 
-    # ── Tabs ──────────────────────────────────────────────────────
+    except Exception as e:
+        st.error(f"❌ Unexpected error loading file: {e}")
+        st.caption("Try a different file or check that it isn't password-protected.")
+        st.stop()
+
+    # Only runs if load succeeded
     tab1, tab2, tab3 = st.tabs([
         "📊 Overview",
         "🚨 Fault Detection",
         "🧹 Cleaning Pipeline"
     ])
-
     with tab1:
         show_overview(df, uploaded)
-
     with tab2:
         show_fault_detection(df)
-
     with tab3:
         show_cleaning(df)
