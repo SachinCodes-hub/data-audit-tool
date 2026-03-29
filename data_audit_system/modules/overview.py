@@ -4,15 +4,13 @@
 import streamlit as st
 from utils.helpers import get_memory_usage
 
-def show_overview(df, file):
+def show_overview(df, file_name: str, file_size: int):
     st.header("📊 Dataset Overview")
 
-    # ── File Info ──────────────────────────────────────────────────
     st.subheader("File Info")
     col1, col2 = st.columns(2)
-    col1.write(f"**File name:** {file.name}")
-    col2.write(f"**File size:** {file.size:,} bytes")
-
+    col1.write(f"**File name:** {file_name}")
+    col2.write(f"**File size:** {file_size:,} bytes")
     # ── Shape ──────────────────────────────────────────────────────
     st.subheader("Shape")
     c1, c2, c3 = st.columns(3)
