@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 from utils.helpers import load_file
 from modules.overview import show_overview
 from modules.fault_detection import show_fault_detection
@@ -12,6 +13,12 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# ── Load CSS ──────────────────────────────────────────────────────────
+css_path = os.path.join(os.path.dirname(__file__), "assets", "style.css")
+if os.path.exists(css_path):
+    with open(css_path) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # ── Session State ─────────────────────────────────────────────────────
 if "df" not in st.session_state:
@@ -34,7 +41,6 @@ with st.sidebar:
     )
 
     if uploaded is not None:
-        # Only reload if it's a new file
         if uploaded.name != st.session_state.file_name:
             try:
                 st.session_state.df        = load_file(uploaded)
@@ -51,7 +57,6 @@ with st.sidebar:
         st.success(f"✅ {st.session_state.file_name}")
         st.caption(f"Size: {st.session_state.file_size:,} bytes")
         st.caption(f"Shape: {st.session_state.df.shape[0]:,} rows × {st.session_state.df.shape[1]} cols")
-
         if st.button("🗑️ Clear file"):
             st.session_state.df        = None
             st.session_state.file_name = None
@@ -63,24 +68,58 @@ with st.sidebar:
 
 # ── Main ──────────────────────────────────────────────────────────────
 if st.session_state.df is None:
-    st.title("🔍 Data Audit System")
-    st.markdown("### Upload a dataset from the sidebar to begin.")
-    st.divider()
 
-    col1, col2, col3, col4 = st.columns(4)
-    col1.info("**📊 Overview**\nShape, types, memory, statistics")
-    col2.success("**🔬 Explorer**\nDistributions, correlations, deep dive")
-    col3.warning("**🚨 Fault Detection**\nDQS Score · ISO 25012 · 7 dimensions")
-    col4.error("**🧹 Cleaning**\n8-step auto pipeline + download")
+    # Welcome screen
+    st.markdown("""
+    <div style='padding: 56px 0 36px 0'>
+        <span class='das-label'>DATA AUDIT SYSTEM · v1.0</span>
+        <h1 style='font-size: 2.8rem; font-weight: 700;
+                   letter-spacing: -0.05em; line-height: 1.15;
+                   margin: 0 0 16px 0'>
+            Know your data.<br>
+            <span style='color: #3b82f6'>Before it breaks your model.</span>
+        </h1>
+        <p style='font-size: 14px; opacity: 0.55; max-width: 480px;
+                  line-height: 1.75; margin: 0 0 48px 0;
+                  font-family: "DM Sans", sans-serif'>
+            Upload any CSV or Excel file and get a full quality audit —
+            ISO 25012 aligned DQS score, visual explorer, and a
+            cleaned dataset ready for ML.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    c1, c2, c3, c4 = st.columns(4)
+    cards = [
+        (c1, "📊", "Overview",        "Shape, types, memory, null counts, statistical summary", "#3b82f6"),
+        (c2, "🔬", "Data Explorer",   "Distributions, correlations, outliers, column deep dive", "#22c55e"),
+        (c3, "🚨", "Fault Detection", "DQS Score across 7 dimensions · ISO 25012 standard",     "#eab308"),
+        (c4, "🧹", "Cleaning",        "8-step automated pipeline · download cleaned file",       "#a855f7"),
+    ]
+    for col, icon, title, desc, color in cards:
+        col.markdown(f"""
+        <div class='das-card'>
+            <span class='das-icon'>{icon}</span>
+            <p class='das-title' style='color:{color}'>{title}</p>
+            <p class='das-desc'>{desc}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style='margin-top: 40px; opacity: 0.4;
+                font-family: "JetBrains Mono", monospace; font-size: 12px'>
+        ← Upload a CSV or Excel file from the sidebar to begin
+    </div>
+    """, unsafe_allow_html=True)
 
 else:
     df = st.session_state.df
 
     tab1, tab2, tab3, tab4 = st.tabs([
-        "📊 Overview",
-        "🔬 Data Explorer",
-        "🚨 Fault Detection",
-        "🧹 Cleaning Pipeline",
+        "📋 Overview",
+        "📡 Data Explorer",
+        "⚠ Fault Detection",
+        "⚙️ Cleaning Pipeline",
     ])
 
     with tab1:
