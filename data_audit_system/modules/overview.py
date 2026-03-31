@@ -10,7 +10,7 @@ def show_overview(df, file_name: str, file_size: int):
         <span class='das-label'>DATASET OVERVIEW</span>
         <div style='display: flex; align-items: center; gap: 8px; flex-wrap: wrap'>
             <span style='font-family: "JetBrains Mono", monospace;
-                        font-size: 14px; font-weight: 600'>
+                         font-size: 14px; font-weight: 600'>
                 {file_name}
             </span>
             <span class='das-pill'>{file_size:,} bytes</span>

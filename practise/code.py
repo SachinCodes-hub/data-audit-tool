@@ -1,5 +1,4 @@
 import streamlit as st
-import os
 from utils.helpers import load_file
 from modules.overview import show_overview
 from modules.fault_detection import show_fault_detection
@@ -8,18 +7,18 @@ from modules.explorer import show_explorer
 
 # ── Page Config ───────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="AuditIQ",
+    page_title="Data Audit System",
     page_icon="🔍",
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
 # ── Load CSS ──────────────────────────────────────────────────────────
+import os
 css_path = os.path.join(os.path.dirname(__file__), "assets", "style.css")
 if os.path.exists(css_path):
     with open(css_path) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
+        
 # ── Session State ─────────────────────────────────────────────────────
 if "df" not in st.session_state:
     st.session_state.df = None
@@ -30,7 +29,7 @@ if "file_size" not in st.session_state:
 
 # ── Sidebar ───────────────────────────────────────────────────────────
 with st.sidebar:
-    st.title(" Data Audit System")
+    st.title("🔍 Data Audit System")
     st.caption("Upload → Analyse → Clean → Download")
     st.divider()
 
@@ -41,6 +40,7 @@ with st.sidebar:
     )
 
     if uploaded is not None:
+        # Only reload if it's a new file
         if uploaded.name != st.session_state.file_name:
             try:
                 st.session_state.df        = load_file(uploaded)
@@ -52,24 +52,59 @@ with st.sidebar:
             except Exception as e:
                 st.error(f"❌ Unexpected error: {e}")
                 st.session_state.df = None
+#prevoius front end part 
+'''
+    if st.session_state.df is None:
+        st.markdown("""
+    <div style='padding: 60px 0 40px 0'>
+        <div style='font-family: "JetBrains Mono", monospace; font-size: 11px;
+                    color: #3b82f6; letter-spacing: 0.1em; margin-bottom: 12px'>
+            DATA AUDIT SYSTEM v1.0
+        </div>
+        <h1 style='font-size: 3rem; font-weight: 700; letter-spacing: -0.05em;
+                color: #ededed; margin: 0 0 16px 0; line-height: 1.1'>
+            Audit your data.<br/>
+            <span style='color: #3b82f6'>Before it breaks your model.</span>
+        </h1>
+        <p style='font-size: 15px; color: #888; max-width: 520px;
+                line-height: 1.7; margin: 0 0 48px 0'>
+            Upload any CSV or Excel file. Get a full data quality report,
+            ISO 25012 aligned DQS score, visual explorer, and a cleaned
+            dataset — all in one tool.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    if st.session_state.df is not None:
-        st.success(f"✅ {st.session_state.file_name}")
-        st.caption(f"Size: {st.session_state.file_size:,} bytes")
-        st.caption(f"Shape: {st.session_state.df.shape[0]:,} rows × {st.session_state.df.shape[1]} cols")
-        if st.button("🗑️ Clear file"):
-            st.session_state.df        = None
-            st.session_state.file_name = None
-            st.session_state.file_size = None
-            st.rerun()
+    col1, col2, col3, col4 = st.columns(4)
+    cards = [
+        ("📊", "Overview", "Shape, dtypes, memory, statistical summary", "#3b82f6"),
+        ("🔬", "Data Explorer", "Distributions, correlations, column deep dive", "#22c55e"),
+        ("🚨", "Fault Detection", "DQS Score · ISO 25012 · 7 dimensions", "#eab308"),
+        ("🧹", "Cleaning", "8-step auto pipeline + cleaned file download", "#a855f7"),
+    ]
+    for col, (icon, title, desc, accent) in zip([col1, col2, col3, col4], cards):
+        col.markdown(f"""
+        <div class='feature-card'>
+            <div class='icon'>{icon}</div>
+            <h4 style='color:{accent}'>{title}</h4>
+            <p>{desc}</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.divider()
-    st.caption("Built with Streamlit + Pandas")
+    st.markdown("""
+    <div style='margin-top: 48px; padding: 16px 20px;
+                background: #111; border: 1px solid #2a2a2a;
+                border-radius: 6px; display: inline-block'>
+        <span style='font-family: "JetBrains Mono", monospace; font-size: 12px;
+                     color: #555'>←</span>
+        <span style='font-family: "JetBrains Mono", monospace; font-size: 12px;
+                     color: #888'> Upload a file from the sidebar to begin</span>
+    </div>
+    """, unsafe_allow_html=True)
+    
+'''
 
-# ── Main ──────────────────────────────────────────────────────────────
 if st.session_state.df is None:
-
-    # Welcome screen
     st.markdown("""
     <div style='padding: 56px 0 36px 0'>
         <span class='das-label'>DATA AUDIT SYSTEM · v1.0</span>
@@ -91,10 +126,10 @@ if st.session_state.df is None:
 
     c1, c2, c3, c4 = st.columns(4)
     cards = [
-        (c1, "📋", "Overview",        "Shape, types, memory, null counts, statistical summary", "#3b82f6"),
-        (c2, "📡", "Data Explorer",   "Distributions, correlations, outliers, column deep dive", "#22c55e"),
-        (c3, "⚠ ", "Fault Detection", "DQS Score across 7 dimensions · ISO 25012 standard",     "#eab308"),
-        (c4, "⚙️", "Cleaning",        "8-step automated pipeline · download cleaned file",       "#a855f7"),
+        (c1, "📊", "Overview",        "Shape, types, memory, null counts, statistical summary", "#3b82f6"),
+        (c2, "🔬", "Data Explorer",   "Distributions, correlations, outliers, column deep dive", "#22c55e"),
+        (c3, "🚨", "Fault Detection", "DQS Score across 7 dimensions · ISO 25012 standard", "#eab308"),
+        (c4, "🧹", "Cleaning",        "8-step automated pipeline · download cleaned file", "#a855f7"),
     ]
     for col, icon, title, desc, color in cards:
         col.markdown(f"""
@@ -112,14 +147,35 @@ if st.session_state.df is None:
     </div>
     """, unsafe_allow_html=True)
 
+    if st.button("🗑️ Clear file"):
+        st.session_state.df        = None
+        st.session_state.file_name = None
+        st.session_state.file_size = None
+        st.rerun()
+
+    st.divider()
+    st.caption("Built with Streamlit + Pandas")
+
+# ── Main ──────────────────────────────────────────────────────────────
+if st.session_state.df is None:
+    st.title("🔍 Data Audit System")
+    st.markdown("### Upload a dataset from the sidebar to begin.")
+    st.divider()
+
+    col1, col2, col3, col4 = st.columns(4)
+    col1.info("**📊 Overview**\nShape, types, memory, statistics")
+    col2.success("**🔬 Explorer**\nDistributions, correlations, deep dive")
+    col3.warning("**🚨 Fault Detection**\nDQS Score · ISO 25012 · 7 dimensions")
+    col4.error("**🧹 Cleaning**\n8-step auto pipeline + download")
+
 else:
     df = st.session_state.df
 
     tab1, tab2, tab3, tab4 = st.tabs([
-        "📋 Overview",
-        "📡 Data Explorer",
-        "⚠ Fault Detection",
-        "⚙️ Cleaning Pipeline",
+        "📊 Overview",
+        "🔬 Data Explorer",
+        "🚨 Fault Detection",
+        "🧹 Cleaning Pipeline",
     ])
 
     with tab1:
