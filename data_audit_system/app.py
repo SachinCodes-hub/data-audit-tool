@@ -30,7 +30,7 @@ if "file_size" not in st.session_state:
 
 # ── Sidebar ───────────────────────────────────────────────────────────
 with st.sidebar:
-    st.title(" Data Audit System")
+    st.title("Data Quality Intelligence Platform")
     st.caption("Upload → Analyse → Clean → Download")
     st.divider()
 
@@ -64,7 +64,7 @@ with st.sidebar:
             st.rerun()
 
     st.divider()
-    st.caption("Built with Streamlit + Pandas")
+    st.caption("AuditIQ · Powered by Streamlit + Pandas")
 
 # ── Main ──────────────────────────────────────────────────────────────
 if st.session_state.df is None:
@@ -72,7 +72,7 @@ if st.session_state.df is None:
     # Welcome screen
     st.markdown("""
     <div style='padding: 56px 0 36px 0'>
-        <span class='das-label'>DATA AUDIT SYSTEM · v1.0</span>
+        <span class='das-label'>AUDITIQ · DATA QUALITY ENGINE · v1.0</span>
         <h1 style='font-size: 2.8rem; font-weight: 700;
                    letter-spacing: -0.05em; line-height: 1.15;
                    margin: 0 0 16px 0'>
@@ -118,7 +118,7 @@ else:
     tab1, tab2, tab3, tab4 = st.tabs([
         "📋 Overview",
         "📡 Data Explorer",
-        "⚠ Fault Detection",
+        "⚠️ Fault Detection",
         "⚙️ Cleaning Pipeline",
     ])
 
