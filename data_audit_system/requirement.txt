@@ -1,9 +1,6 @@
-#when we will deploy this code , libraries used are not present in server . so to tell it we need this libraries
-
-
 streamlit>=1.32.0
 pandas>=2.0.0
 numpy>=1.26.0
 plotly>=5.20.0
 openpyxl>=3.1.0
-
+xlrd>=2.0.1
