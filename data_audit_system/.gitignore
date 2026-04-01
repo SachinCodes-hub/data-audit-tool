@@ -1,14 +1,43 @@
-#files that should never go to git hub 
+# ─────────────────────────────────────────
+# Python
+# ─────────────────────────────────────────
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*$py.class
+
+# Virtual Environments
 .env
 .venv/
 venv/
+env/
+
+# Distribution / packaging
+build/
+dist/
 *.egg-info/
+.eggs/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# OS Files
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
+
+# Data Files (important for privacy + repo size)
 *.csv
 *.xlsx
+*.xls
 
-__pycache__/
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code / IDE
+.vscode/
+.idea/
+
+# Mac/Linux temp
+*.swp
