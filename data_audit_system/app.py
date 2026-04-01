@@ -89,7 +89,8 @@ if st.session_state.df is None:
     </div>
     """, unsafe_allow_html=True)
 
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2 = st.columns(2)
+    c3, c4 = st.columns(2)
     cards = [
         (c1, "📋", "Overview",        "Shape, types, memory, null counts, statistical summary", "#3b82f6"),
         (c2, "📡", "Data Explorer",   "Distributions, correlations, outliers, column deep dive", "#22c55e"),

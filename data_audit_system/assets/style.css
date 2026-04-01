@@ -7,7 +7,7 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
 /* ── Font application ────────────────────────────────────────── */
-html, body, [class*="st-"], [data-testid] {
+html, body {
     font-family: 'DM Sans', system-ui, sans-serif !important;
 }
 
@@ -15,7 +15,7 @@ html, body, [class*="st-"], [data-testid] {
 [data-testid="stMetric"] {
     border: 1px solid rgba(128,128,128,0.2) !important;
     border-radius: 8px !important;
-    padding: 20px !important;
+    
     transition: border-color 0.2s, box-shadow 0.2s !important;
     background: rgba(128,128,128,0.04) !important;
 }
