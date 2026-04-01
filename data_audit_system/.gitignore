@@ -11,3 +11,4 @@ Thumbs.db
 *.csv
 *.xlsx
 
+__pycache__/
