@@ -334,13 +334,21 @@ def _show_correlations(df, tags):
 
     if x_col and y_col:
         r = df[[x_col, y_col]].corr().iloc[0, 1]
-        fig2 = px.scatter(
-            df, x=x_col, y=y_col,
-            color=None if color_col == "None" else color_col,
-            trendline="ols",
-            title=f"{x_col} vs {y_col}  (r = {r:.3f})",
+        try:
+            fig2 = px.scatter(
+                df,
+                x=x_col,
+                y=y_col,
+                trendline="ols",
+                opacity=0.6,
+    )
+        except Exception:
+            fig2 = px.scatter(
+            df,
+            x=x_col,
+            y=y_col,
             opacity=0.6,
-        )
+    )
         fig2.update_layout(height=450)
         st.plotly_chart(fig2, use_container_width=True)
 
