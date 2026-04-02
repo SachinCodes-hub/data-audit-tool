@@ -8,7 +8,7 @@ from modules.explorer import show_explorer
 from PIL import Image
 
 # ── Page Config ───────────────────────────────────────────────────────
-icon_path = os.path.join(os.path.dirname(__file__), "assets", "iq_logo.jpg")
+icon_path = os.path.join(os.path.dirname(__file__), "assets", "image.png")
 page_icon = Image.open(icon_path) if os.path.exists(icon_path) else "🔭"
 
 st.set_page_config(
