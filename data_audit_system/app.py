@@ -9,7 +9,7 @@ from modules.explorer import show_explorer
 # ── Page Config ───────────────────────────────────────────────────────
 st.set_page_config(
     page_title="AuditIQ",
-    page_icon="🔍",
+    page_icon="https://www.creativefabrica.com/product/iq-logo-design-vector/",
     layout="wide",
     initial_sidebar_state="expanded"
 )
