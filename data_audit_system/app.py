@@ -27,17 +27,20 @@ if "file_name" not in st.session_state:
     st.session_state.file_name = None
 if "file_size" not in st.session_state:
     st.session_state.file_size = None
+if "uploader_key" not in st.session_state:
+    st.session_state.uploader_key = 0  # incrementing this resets the uploader
 
 # ── Sidebar ───────────────────────────────────────────────────────────
 with st.sidebar:
-    st.title("Data Quality Intelligence Platform")
+    st.title("🔍 Data Audit System")
     st.caption("Upload → Analyse → Clean → Download")
     st.divider()
 
     uploaded = st.file_uploader(
         "Upload Dataset",
         type=["csv", "xlsx"],
-        help="Supports CSV and Excel files"
+        help="Supports CSV and Excel files",
+        key=f"uploader_{st.session_state.uploader_key}"  # key changes on clear
     )
 
     if uploaded is not None:
@@ -57,10 +60,12 @@ with st.sidebar:
         st.success(f"✅ {st.session_state.file_name}")
         st.caption(f"Size: {st.session_state.file_size:,} bytes")
         st.caption(f"Shape: {st.session_state.df.shape[0]:,} rows × {st.session_state.df.shape[1]} cols")
+
         if st.button("🗑️ Clear file"):
-            st.session_state.df        = None
-            st.session_state.file_name = None
-            st.session_state.file_size = None
+            st.session_state.df          = None
+            st.session_state.file_name   = None
+            st.session_state.file_size   = None
+            st.session_state.uploader_key += 1  # this forces uploader to reset
             st.rerun()
 
     st.divider()
