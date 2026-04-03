@@ -40,10 +40,10 @@ with st.sidebar:
     <div style="display:flex; align-items:center; gap:10px;">
         <svg width="32" height="32" viewBox="0 0 44 44">
             <polygon points="22,4 38,4 46,18 38,32 22,32 14,18" 
-                fill="none" stroke="#8B5CF6" stroke-width="2"/>
-            <text x="22" y="22" text-anchor="middle" 
-                fill="#8B5CF6" font-size="12" font-weight="600" 
-                dominant-baseline="middle">IQ</text>
+                fill="#8B5CF6" stroke="#8B5CF6" stroke-width="2"/>
+            <text x="22" y="18" text-anchor="middle" 
+                fill="white" font-size="12" font-weight="600" 
+                dy="0.35em">IQ</text>
         </svg>
         <span style="font-size:20px; font-weight:600;">AuditIQ</span>
     </div>

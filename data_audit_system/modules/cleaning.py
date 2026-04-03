@@ -6,14 +6,16 @@ import pandas as pd
 import numpy as np
 import re
 from utils.helpers import PLACEHOLDERS, compute_dqs
-
+from modules.runcleaningpipeline import run_cleaning_pipeline_ui
 def show_cleaning(df):
     st.header("🧹 Cleaning Pipeline")
     st.info("This will automatically clean your dataset using 8 steps. The cleaned file is available for download.")
 
-    if st.button("▶️ Run Cleaning Pipeline", type="primary"):
-        df_cleaned = df.copy()
-
+    if st.button("▶ Run Cleaning Pipeline"):
+        run_cleaning_pipeline_ui(df)
+        # your actual cleaning logic here
+        cleaned_df = your_existing_clean_function(df)
+        st.session_state['cleaned_df'] = cleaned_df
         with st.status("Cleaning in progress...", expanded=True) as status:
 
             # Step 1 — Column names
