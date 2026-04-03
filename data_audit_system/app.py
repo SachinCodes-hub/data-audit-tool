@@ -36,8 +36,19 @@ if "uploader_key" not in st.session_state:
 
 # ── Sidebar ───────────────────────────────────────────────────────────
 with st.sidebar:
-    st.title("🔍 Data Audit System")
-    st.caption("Upload → Analyse → Clean → Download")
+    st.markdown("""
+    <div style="display:flex; align-items:center; gap:10px;">
+        <svg width="32" height="32" viewBox="0 0 44 44">
+            <polygon points="22,4 38,4 46,18 38,32 22,32 14,18" 
+                fill="none" stroke="#8B5CF6" stroke-width="2"/>
+            <text x="22" y="22" text-anchor="middle" 
+                fill="#8B5CF6" font-size="12" font-weight="600" 
+                dominant-baseline="middle">IQ</text>
+        </svg>
+        <span style="font-size:20px; font-weight:600;">AuditIQ</span>
+    </div>
+    """, unsafe_allow_html=True)
+    st.caption("Ingest → Profile → Remediate → Export")
     st.divider()
 
     uploaded = st.file_uploader(
@@ -73,7 +84,7 @@ with st.sidebar:
             st.rerun()
 
     st.divider()
-    st.caption("AuditIQ · Powered by Streamlit + Pandas")
+    st.caption("AuditIQ © 2025 · Built on Streamlit & Pandas")
 
 # ── Main ──────────────────────────────────────────────────────────────
 if st.session_state.df is None:
@@ -81,7 +92,7 @@ if st.session_state.df is None:
     # Welcome screen
     st.markdown("""
     <div style='padding: 56px 0 36px 0'>
-        <span class='das-label'>AUDITIQ · DATA QUALITY ENGINE · v1.0</span>
+        <span class='das-label'>AUDITIQ · DATA QUALITY PLATFORM · v1.0.0</span>
         <h1 style='font-size: 2.8rem; font-weight: 700;
                    letter-spacing: -0.05em; line-height: 1.15;
                    margin: 0 0 16px 0'>
@@ -101,10 +112,10 @@ if st.session_state.df is None:
     c1, c2 = st.columns(2)
     c3, c4 = st.columns(2)
     cards = [
-        (c1, "📋", "Overview",        "Shape, types, memory, null counts, statistical summary", "#3b82f6"),
-        (c2, "📡", "Data Explorer",   "Distributions, correlations, outliers, column deep dive", "#22c55e"),
-        (c3, "⚠ ", "Fault Detection", "DQS Score across 7 dimensions · ISO 25012 standard",     "#eab308"),
-        (c4, "⚙️", "Cleaning",        "8-step automated pipeline · download cleaned file",       "#a855f7"),
+        (c1, "📋", "Data Profile",        "Schema, data types, memory footprint, completeness metrics", "#3b82f6"),
+        (c2, "📡", "Quality Assessment",   "Distributions, correlations, outliers, column deep dive", "#22c55e"),
+        (c3, "⚠ ", "Statistical Explorer", "ISO 25012-compliant DQS scoring across 7 quality dimensions",     "#eab308"),
+        (c4, "⚙️", "CleanIQ",        "Automated 8-stage remediation pipeline with audit trail",       "#a855f7"),
     ]
     for col, icon, title, desc, color in cards:
         col.markdown(f"""
@@ -129,7 +140,7 @@ else:
         "📋 Overview",
         "📡 Data Explorer",
         "⚠️ Fault Detection",
-        "⚙️ Cleaning Pipeline",
+        "⚡ CleanIQ Pipeline",
     ])
 
     with tab1:
