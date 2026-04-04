@@ -38,11 +38,11 @@ if "uploader_key" not in st.session_state:
 with st.sidebar:
     st.markdown("""
     <div style="display:flex; align-items:center; gap:10px;">
-        <svg width="32" height="32" viewBox="0 0 44 44">
-            <polygon points="22,4 38,4 46,18 38,32 22,32 14,18" 
+        <svg width="32" height="32" viewBox="0 0 60 60">
+            <polygon points="30,5 50,15 50,45 30,55 10,45 10,15" 
                 fill="#8B5CF6" stroke="#8B5CF6" stroke-width="2"/>
-            <text x="22" y="21" text-anchor="middle" dominant-baseline="central"
-                fill="white" font-size="11" font-weight="700">IQ</text>
+            <text x="30" y="30" text-anchor="middle" dominant-baseline="central"
+                fill="white" font-size="14" font-weight="700">IQ</text>
         </svg>
         <span style="font-size:20px; font-weight:600;">AuditIQ</span>
     </div>

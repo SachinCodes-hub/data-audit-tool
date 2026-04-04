@@ -4,12 +4,19 @@ import numpy as np
 from utils.helpers import PLACEHOLDERS, compute_dqs
 from modules.runcleaningpipeline import run_cleaning_pipeline_ui
 import io
-def show_cleaning(df , uploaded_file):
+
+def show_cleaning(df, uploaded_file):
     st.header("⚡ CleanIQ Pipeline")
     st.info("This will automatically clean your dataset using 8 steps. The cleaned file is available for download.")
 
-    if st.button("Launch CleanIQ"):
+    # ── Styled Launch Button ──────────────────────────────────────
+    _, col_c, _ = st.columns([1.5, 2, 1.5])
+    with col_c:
+        st.markdown('<div class="launch-btn">', unsafe_allow_html=True)
+        launch = st.button("⚡ Launch CleanIQ", use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
+    if launch:
         # ── Terminal UI ───────────────────────────────────────────
         run_cleaning_pipeline_ui(df)
 
@@ -57,7 +64,9 @@ def show_cleaning(df , uploaded_file):
             if IQR > 0:
                 df_cleaned[col] = df_cleaned[col].clip(Q1 - 3*IQR, Q3 + 3*IQR)
 
+        # ── Save to session state ─────────────────────────────────
         st.session_state['cleaned_df'] = df_cleaned
+        st.session_state['original_name'] = uploaded_file.name.rsplit(".", 1)[0]
 
         # ── Before vs After ───────────────────────────────────────
         st.subheader("Before vs After")
@@ -96,22 +105,32 @@ def show_cleaning(df , uploaded_file):
         st.subheader("Cleaned Dataset Preview")
         st.dataframe(df_cleaned.head(20), use_container_width=True)
 
-        # ── Download ──────────────────────────────────────────────
-        
-        # ── Download ──────────────────────────────────────────────
-        original_name = uploaded_file.name.rsplit(".", 1)[0]
+    # ── Download — outside button block so radio reruns work ─────
+    if st.session_state.get('cleaned_df') is not None:
+        df_cleaned  = st.session_state['cleaned_df']
+        original_name = st.session_state.get('original_name', 'dataset')
+
+        st.subheader("⬇️ Export Cleaned Dataset")
         fmt = st.radio("Download format", ["CSV", "Excel"], horizontal=True)
 
         if fmt == "CSV":
-            data = df_cleaned.to_csv(index=False).encode("utf-8")
+            data  = df_cleaned.to_csv(index=False).encode("utf-8")
             fname = f"{original_name}_cleaniq.csv"
-            mime = "text/csv"
+            mime  = "text/csv"
         else:
             output = io.BytesIO()
             df_cleaned.to_excel(output, index=False, engine="openpyxl")
             output.seek(0)
-            data = output
+            data  = output
             fname = f"{original_name}_cleaniq.xlsx"
-            mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            mime  = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
-        st.download_button("⬇️ Download Audit-Cleaned File", data=data, file_name=fname, mime=mime)
+        _, dl_col, _ = st.columns([1.5, 2, 1.5])
+        with dl_col:
+            st.download_button(
+                "⬇️ Download Audit-Cleaned File",
+                data=data,
+                file_name=fname,
+                mime=mime,
+                use_container_width=True
+            )

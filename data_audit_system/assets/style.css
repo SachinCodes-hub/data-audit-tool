@@ -368,3 +368,25 @@ h3, h4 {
     border-radius: 8px !important;
     padding: 20px !important;
 }
+
+
+/* ── Launch CleanIQ Button ───────────────────────────────────── */
+.launch-btn > div > button {
+    background: linear-gradient(135deg, #7c3aed, #a855f7) !important;
+    color: white !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    padding: 14px 48px !important;
+    border-radius: 10px !important;
+    border: none !important;
+    letter-spacing: 0.3px !important;
+    width: 100% !important;
+    box-shadow: 0 4px 20px rgba(168, 85, 247, 0.35) !important;
+    transition: all 0.2s ease !important;
+}
+
+.launch-btn > div > button:hover {
+    background: linear-gradient(135deg, #6d28d9, #9333ea) !important;
+    box-shadow: 0 6px 24px rgba(168, 85, 247, 0.5) !important;
+    transform: translateY(-2px) !important;
+}
