@@ -217,6 +217,7 @@ This project is licensed under the MIT License. See `LICENSE` for details.
 ## Author
 
 **sachin karale**
+**vedant shinde**
 
 Built by a open source contributor passionate about data quality and ML engineering.
 

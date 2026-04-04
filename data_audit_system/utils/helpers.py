@@ -7,8 +7,8 @@ PLACEHOLDERS = {
     "unknown", "undefined", "missing", "tbd", "tbc", "#n/a"
 }
 
-MAX_FILE_SIZE_MB = 100  # change this if you want to allow bigger files
-MAX_ROWS = 500_000      # safety cap — beyond this pandas gets slow
+MAX_FILE_SIZE_MB = 100  
+MAX_ROWS = 500_000      
 
 
 def load_file(uploaded_file) -> pd.DataFrame:
@@ -19,8 +19,7 @@ def load_file(uploaded_file) -> pd.DataFrame:
     Returns a clean DataFrame or raises a descriptive ValueError.
     """
 
-    # ── 1. File size check ───────────────────────────────────────
-    # Why: A 500MB file will crash Streamlit Cloud (only 1GB RAM)
+    
     size_mb = uploaded_file.size / (1024 * 1024)
     if size_mb > MAX_FILE_SIZE_MB:
         raise ValueError(
@@ -30,11 +29,11 @@ def load_file(uploaded_file) -> pd.DataFrame:
 
     name = uploaded_file.name.lower()
 
-    # ── 2. CSV loading ───────────────────────────────────────────
+    
     if name.endswith(".csv"):
         df = _load_csv(uploaded_file)
 
-    # ── 3. Excel loading ─────────────────────────────────────────
+    
     elif name.endswith((".xlsx", ".xls")):
         df = _load_excel(uploaded_file)
 
@@ -44,23 +43,20 @@ def load_file(uploaded_file) -> pd.DataFrame:
             f"Please upload a .csv or .xlsx file."
         )
 
-    # ── 4. Empty file check ──────────────────────────────────────
-    # Why: An empty DataFrame will crash every downstream function
+    
     if df is None or df.empty:
         raise ValueError(
             "The file appears to be empty — no rows of data found. "
             "Please check the file and try again."
         )
 
-    # ── 5. Minimum viable shape ──────────────────────────────────
-    # Why: A file with 0 columns (just whitespace) is useless
+    
     if df.shape[1] == 0:
         raise ValueError(
             "No columns detected. The file may be blank or incorrectly formatted."
         )
 
-    # ── 6. Row cap ───────────────────────────────────────────────
-    # Why: 1M row files won't crash but will be very slow
+    
     if len(df) > MAX_ROWS:
         df = df.head(MAX_ROWS)
         st.warning(
@@ -80,11 +76,11 @@ def _load_csv(uploaded_file) -> pd.DataFrame:
 
     for enc in encodings:
         try:
-            uploaded_file.seek(0)  # reset pointer before each attempt
+            uploaded_file.seek(0)  
             df = pd.read_csv(uploaded_file, encoding=enc)
             return df
         except UnicodeDecodeError:
-            continue  # try next encoding
+            continue  
         except pd.errors.EmptyDataError:
             raise ValueError("CSV file is empty — no data found.")
         except pd.errors.ParserError as e:
@@ -110,13 +106,12 @@ def _load_excel(uploaded_file) -> pd.DataFrame:
 
     sheet_names = xl.sheet_names
 
-    # Single sheet — just load it
+    
     if len(sheet_names) == 1:
         df = xl.parse(sheet_names[0])
         return df
 
-    # Multiple sheets — let user pick
-    # Why: silently picking sheet 0 is a hidden bug
+    
     st.info(f"📋 This Excel file has **{len(sheet_names)} sheets**: {', '.join(sheet_names)}")
     chosen = st.selectbox(
         "Which sheet contains your data?",
@@ -124,8 +119,7 @@ def _load_excel(uploaded_file) -> pd.DataFrame:
         key="sheet_selector"
     )
 
-    # st.stop() trick: don't proceed until user picks
-    # (selectbox always has a value so just parse chosen)
+    
     df = xl.parse(chosen)
     return df
 

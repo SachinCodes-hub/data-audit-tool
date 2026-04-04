@@ -6,10 +6,6 @@ import plotly.graph_objects as go
 from utils.helpers import PLACEHOLDERS
 
 
-# ══════════════════════════════════════════════════════════════════════
-# SMART COLUMN CLASSIFIER
-# Runs once, tags every column — used by Explorer + ML Readiness
-# ══════════════════════════════════════════════════════════════════════
 
 def classify_columns(df: pd.DataFrame) -> dict:
     """
@@ -74,9 +70,9 @@ def classify_columns(df: pd.DataFrame) -> dict:
     return tags
 
 
-# ══════════════════════════════════════════════════════════════════════
+
 # MAIN EXPLORER PAGE
-# ══════════════════════════════════════════════════════════════════════
+
 
 def show_explorer(df: pd.DataFrame):
     st.header("🔬 Data Explorer")
@@ -84,7 +80,7 @@ def show_explorer(df: pd.DataFrame):
 
     tags = classify_columns(df)
 
-    # ── Column Type Summary ───────────────────────────────────────
+    #  Column Type Summary 
     st.subheader("🏷️ Smart Column Classifier")
     st.caption("Auto-detected column roles — helps you know what to use in your model")
 
@@ -130,7 +126,7 @@ def show_explorer(df: pd.DataFrame):
 
     st.divider()
 
-    # ── Section tabs ─────────────────────────────────────────────
+    #  Section tabs
     t1, t2, t3, t4, t5 = st.tabs([
         "📊 Distributions",
         "📦 Box Plots",
@@ -155,9 +151,9 @@ def show_explorer(df: pd.DataFrame):
         _show_column_deep_dive(df, tags)
 
 
-# ══════════════════════════════════════════════════════════════════════
+#
 # TAB 1 — DISTRIBUTIONS
-# ══════════════════════════════════════════════════════════════════════
+
 
 def _show_distributions(df, tags):
     st.subheader("Distribution of Every Column")
@@ -232,9 +228,9 @@ def _show_distributions(df, tags):
                                f"{df[col].nunique()} unique values")
 
 
-# ══════════════════════════════════════════════════════════════════════
+
 # TAB 2 — BOX PLOTS
-# ══════════════════════════════════════════════════════════════════════
+
 
 def _show_boxplots(df, tags):
     st.subheader("Outlier Visualisation — Box Plots")
@@ -291,9 +287,9 @@ def _show_boxplots(df, tags):
             st.success("✅ No outliers in this column at 1.5×IQR threshold")
 
 
-# ══════════════════════════════════════════════════════════════════════
+
 # TAB 3 — CORRELATIONS
-# ══════════════════════════════════════════════════════════════════════
+
 
 def _show_correlations(df, tags):
     st.subheader("Correlation Analysis")
@@ -363,9 +359,9 @@ def _show_correlations(df, tags):
             st.success(f"✅ r = {r:.2f} — Weak/no linear correlation.")
 
 
-# ══════════════════════════════════════════════════════════════════════
+
 # TAB 4 — TARGET COLUMN ANALYSIS
-# ══════════════════════════════════════════════════════════════════════
+
 
 def _show_target_analysis(df, tags):
     st.subheader("🎯 Target Column Analysis")
@@ -427,7 +423,7 @@ def _show_target_analysis(df, tags):
         )
         st.plotly_chart(fig2, use_container_width=True)
 
-    # ── Regression target ─────────────────────────────────────────
+    # Regression target 
     elif tag == "numeric":
         data = df[target].dropna()
 
@@ -457,9 +453,9 @@ def _show_target_analysis(df, tags):
         st.info(f"Target column type `{tag}` — detailed analysis not available for this type.")
 
 
-# ══════════════════════════════════════════════════════════════════════
+
 # TAB 5 — COLUMN DEEP DIVE
-# ══════════════════════════════════════════════════════════════════════
+
 
 def _show_column_deep_dive(df, tags):
     st.subheader("🔍 Column Deep Dive")
@@ -473,7 +469,7 @@ def _show_column_deep_dive(df, tags):
     tag  = tags.get(selected, "unknown")
     data = df[selected]
 
-    # ── Header info ───────────────────────────────────────────────
+    # Header info 
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Detected Type", tag)
     col2.metric("Null %", f"{data.isnull().mean()*100:.1f}%")
@@ -482,7 +478,7 @@ def _show_column_deep_dive(df, tags):
 
     st.divider()
 
-    # ── Encoding suggestion ───────────────────────────────────────
+    #  Encoding suggestion 
     ENCODING_ADVICE = {
         "numeric":          ("✅ Ready to use", "No encoding needed. Scale with StandardScaler or MinMaxScaler if needed."),
         "binary":           ("✅ Ready to use", "Binary column. Encode as 0/1 if not already numeric."),
@@ -501,7 +497,7 @@ def _show_column_deep_dive(df, tags):
 
     st.divider()
 
-    # ── Visual + stats ────────────────────────────────────────────
+    # Visual + stats 
     if tag in ("numeric",):
         clean = data.dropna()
         fig = px.histogram(clean, x=clean, nbins=50, marginal="box",

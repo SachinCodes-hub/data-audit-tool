@@ -7,7 +7,6 @@ from modules.cleaning import show_cleaning
 from modules.explorer import show_explorer
 from PIL import Image
 
-# ── Page Config ───────────────────────────────────────────────────────
 icon_path = os.path.join(os.path.dirname(__file__), "assets", "iqlogofinal.jpeg")
 page_icon = Image.open(icon_path) if os.path.exists(icon_path) else "🔭"
 
@@ -18,13 +17,13 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ── Load CSS ──────────────────────────────────────────────────────────
+
 css_path = os.path.join(os.path.dirname(__file__), "assets", "style.css")
 if os.path.exists(css_path):
     with open(css_path) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# ── Session State ─────────────────────────────────────────────────────
+
 if "df" not in st.session_state:
     st.session_state.df = None
 if "file_name" not in st.session_state:
@@ -32,9 +31,9 @@ if "file_name" not in st.session_state:
 if "file_size" not in st.session_state:
     st.session_state.file_size = None
 if "uploader_key" not in st.session_state:
-    st.session_state.uploader_key = 0  # incrementing this resets the uploader
+    st.session_state.uploader_key = 0  
 
-# ── Sidebar ───────────────────────────────────────────────────────────
+
 with st.sidebar:
     st.markdown("""
     <div style="display:flex; align-items:center; gap:10px;">
@@ -79,16 +78,16 @@ with st.sidebar:
             st.session_state.df          = None
             st.session_state.file_name   = None
             st.session_state.file_size   = None
-            st.session_state.uploader_key += 1  # this forces uploader to reset
+            st.session_state.uploader_key += 1  
             st.rerun()
 
     st.divider()
     st.caption("AuditIQ © 2025 · Built on Streamlit & Pandas")
 
-# ── Main ──────────────────────────────────────────────────────────────
+
 if st.session_state.df is None:
 
-    # Welcome screen
+    
     st.markdown("""
     <div style='padding: 56px 0 36px 0'>
         <span class='das-label'>AUDITIQ · DATA QUALITY PLATFORM · v1.0.0</span>

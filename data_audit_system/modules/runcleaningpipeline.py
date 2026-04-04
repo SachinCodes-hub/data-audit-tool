@@ -3,7 +3,7 @@ import time
 
 def run_cleaning_pipeline_ui(df):
     
-    # Terminal style CSS
+    
     st.markdown("""
         <style>
         .terminal-box {
@@ -111,7 +111,7 @@ def run_cleaning_pipeline_ui(df):
     terminal_placeholder = st.empty()
     all_lines = []
 
-    # Header
+    
     all_lines.append(('<span class="term-white">AuditIQ CleanIQ Pipeline v1.0.0</span>', 0))
     all_lines.append(('<span class="term-gray">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>', 0))
     all_lines.append(('<span class="term-gray">Dataset : ElectronicsData.csv</span>', 0))
@@ -136,7 +136,7 @@ def run_cleaning_pipeline_ui(df):
     }
 
     for step in steps:
-        # Step header
+        
         all_lines.append((f'<span class="term-white">[ {step["title"]} ]</span>', 0))
         render_terminal(all_lines)
         time.sleep(0.3)
@@ -151,7 +151,7 @@ def run_cleaning_pipeline_ui(df):
         render_terminal(all_lines)
         time.sleep(0.2)
 
-    # Final summary
+    
     all_lines.append(('<span class="term-gray">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>', 0))
     all_lines.append(('<span class="term-green">✔ ALL 8 STEPS COMPLETED SUCCESSFULLY</span>', 0))
     all_lines.append(('<span class="term-green">✔ CleanIQ Pipeline finished. Dataset is ML-ready.</span>', 0))

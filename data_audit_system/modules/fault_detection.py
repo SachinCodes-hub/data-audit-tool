@@ -17,13 +17,13 @@ def show_fault_detection(df):
     st.header("🚨 Fault Detection — Data Quality Score")
     st.caption("Scoring aligned with ISO 25012 Data Quality Standard")
 
-    scores = {}      # dimension → score (0–100)
-    findings = {}    # dimension → list of finding strings (shown to user)
+    scores = {}      
+    findings = {}    
 
-    # ══════════════════════════════════════════════════════════════
+    
     # D1 — COMPLETENESS (28%)
     # ISO def: degree to which data has values for all expected attributes
-    # ══════════════════════════════════════════════════════════════
+    
     with st.expander("D1 — Completeness (28%)", expanded=True):
 
         null_count = df.isnull().sum().sum()
@@ -84,10 +84,10 @@ def show_fault_detection(df):
             )
             st.plotly_chart(fig, use_container_width=True)
 
-    # ══════════════════════════════════════════════════════════════
+    
     # D2 — UNIQUENESS (18%)
     # ISO def: degree to which data is free from duplication
-    # ══════════════════════════════════════════════════════════════
+    
     with st.expander("D2 — Uniqueness (18%)"):
 
         exact_dupes = df.duplicated().sum()
@@ -126,11 +126,10 @@ def show_fault_detection(df):
 
         _render_dimension("D2 — Uniqueness", scores["uniqueness"], findings["uniqueness"])
 
-    # ══════════════════════════════════════════════════════════════
+   
     # D3 — CONSISTENCY (16%)
     # ISO def: degree to which data is free from contradiction
-    # across the dataset
-    # ══════════════════════════════════════════════════════════════
+    
     with st.expander("D3 — Consistency (16%)"):
 
         mixed_type_cols  = []
@@ -161,9 +160,7 @@ def show_fault_detection(df):
                 if vals.str.strip().str.lower().nunique() < vals.str.strip().nunique():
                     case_issue_cols.append(col)
 
-            # Mixed date formats — humans miss this constantly
-            # Why: "01/12/2024" and "2024-01-12" look fine individually
-            # but together mean your date column is inconsistent
+            
             if df[col].nunique() > 5:
                 matched_patterns = set()
                 sample = vals.head(200)
@@ -173,7 +170,7 @@ def show_fault_detection(df):
                 if len(matched_patterns) > 1:
                     date_format_cols.append(col)
 
-            # Encoding garbage
+            
             if vals.str.contains(r"â€|Ã©|Ã¨|Â|ï»¿", regex=True, na=False).sum() > 0:
                 encoding_cols.append(col)
 
@@ -196,11 +193,11 @@ def show_fault_detection(df):
 
         _render_dimension("D3 — Consistency", scores["consistency"], findings["consistency"])
 
-    # ══════════════════════════════════════════════════════════════
+    
     # D4 — VALIDITY (16%)
     # ISO def: degree to which data values are in the correct range
     # and format for their domain
-    # ══════════════════════════════════════════════════════════════
+    
     with st.expander("D4 — Validity (16%)"):
 
         outlier_info  = []
@@ -271,13 +268,13 @@ def show_fault_detection(df):
         if outlier_info:
             st.dataframe(pd.DataFrame(outlier_info), use_container_width=True)
 
-    # ══════════════════════════════════════════════════════════════
+    
     # D5 — ACCURACY (10%)
     # ISO def: degree to which data correctly represents the
     # real-world values it is meant to model
     # NOTE: True accuracy needs a reference dataset. Without one,
     # we check statistical proxies: extreme skew + label noise.
-    # ══════════════════════════════════════════════════════════════
+    
     with st.expander("D5 — Accuracy (10%)"):
 
         skewed_cols  = []
@@ -321,10 +318,10 @@ def show_fault_detection(df):
 
         _render_dimension("D5 — Accuracy", scores["accuracy"], findings["accuracy"])
 
-    # ══════════════════════════════════════════════════════════════
+    
     # D6 — STRUCTURE (7%)
     # ISO def: degree to which data follows schema conventions
-    # ══════════════════════════════════════════════════════════════
+    
     with st.expander("D6 — Structure (7%)"):
 
         bad_col_names   = []
@@ -367,11 +364,11 @@ def show_fault_detection(df):
 
         _render_dimension("D6 — Structure", scores["structure"], findings["structure"])
 
-    # ══════════════════════════════════════════════════════════════
+    
     # D7 — CORRELATION / REDUNDANCY (5%)
     # ISO def: degree to which data is free from redundant
     # or linearly dependent attributes
-    # ══════════════════════════════════════════════════════════════
+   
     with st.expander("D7 — Correlation & Redundancy (5%)"):
 
         high_corr_pairs = []
@@ -416,14 +413,14 @@ def show_fault_detection(df):
 
         _render_dimension("D7 — Correlation", scores["correlation"], findings["correlation"])
 
-    # ══════════════════════════════════════════════════════════════
+    
     # FINAL DQS
-    # ══════════════════════════════════════════════════════════════
+    
     st.divider()
     _render_dqs(scores, findings, df)
 
 
-# ── Helper renderers ─────────────────────────────────────────────────
+
 
 def _render_dimension(title: str, score: float, findings: list):
     """Shows score + colour-coded findings for one dimension."""
@@ -454,8 +451,7 @@ def _render_dqs(scores: dict, findings: dict, df: pd.DataFrame):
         "correlation":  0.05,
     }
 
-    # Weighted average — clean, no arbitrary multipliers
-    # Why removed size_factor: a small clean dataset IS high quality
+    
     dqs = round(sum(WEIGHTS[k] * scores.get(k, 0) for k in WEIGHTS), 2)
 
     grade = ("A 🟢" if dqs >= 85 else "B 🟡" if dqs >= 70
@@ -499,7 +495,7 @@ def _render_dqs(scores: dict, findings: dict, df: pd.DataFrame):
         )
         st.plotly_chart(fig, use_container_width=True)
 
-    # ── What to fix — prioritised action list ─────────────────────
+    # ── What to fix — prioritised action list 
     st.subheader("📋 What to Fix — Priority Order")
     st.caption("Sorted by impact on your DQS score")
 
@@ -525,7 +521,7 @@ def _render_dqs(scores: dict, findings: dict, df: pd.DataFrame):
     else:
         st.success("🎉 No significant issues found! Your dataset is high quality.")
 
-    # ── Dimension breakdown bar ───────────────────────────────────
+    #  Dimension breakdown bar 
     fig2 = px.bar(
         x=list(scores.keys()),
         y=list(scores.values()),

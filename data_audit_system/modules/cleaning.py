@@ -9,7 +9,7 @@ def show_cleaning(df, uploaded_file):
     st.header("⚡ CleanIQ Pipeline")
     st.info("This will automatically clean your dataset using 8 steps. The cleaned file is available for download.")
 
-    # ── Styled Launch Button ──────────────────────────────────────
+    
     _, col_c, _ = st.columns([1.5, 2, 1.5])
     with col_c:
         st.markdown('<div class="launch-btn">', unsafe_allow_html=True)
@@ -17,10 +17,10 @@ def show_cleaning(df, uploaded_file):
         st.markdown('</div>', unsafe_allow_html=True)
 
     if launch:
-        # ── Terminal UI ───────────────────────────────────────────
+        
         run_cleaning_pipeline_ui(df)
 
-        # ── Actual Cleaning Logic ─────────────────────────────────
+        
         df_cleaned = df.copy()
 
         # Step 1 — Column names
@@ -64,11 +64,11 @@ def show_cleaning(df, uploaded_file):
             if IQR > 0:
                 df_cleaned[col] = df_cleaned[col].clip(Q1 - 3*IQR, Q3 + 3*IQR)
 
-        # ── Save to session state ─────────────────────────────────
+        # Save to session state 
         st.session_state['cleaned_df'] = df_cleaned
         st.session_state['original_name'] = uploaded_file.name.rsplit(".", 1)[0]
 
-        # ── Before vs After ───────────────────────────────────────
+        # Before vs After 
         st.subheader("Before vs After")
         col1, col2, col3 = st.columns(3)
         col1.metric("Rows", df.shape[0], delta=df_cleaned.shape[0] - df.shape[0])
@@ -76,7 +76,7 @@ def show_cleaning(df, uploaded_file):
         col3.metric("Missing Cells", int(df.isnull().sum().sum()),
                     delta=int(df_cleaned.isnull().sum().sum() - df.isnull().sum().sum()))
 
-        # ── DQS Comparison ────────────────────────────────────────
+        # DQS Comparison
         st.subheader("DQS: Before vs After Cleaning")
 
         def quick_dqs(d):
@@ -101,11 +101,11 @@ def show_cleaning(df, uploaded_file):
         c2.metric("DQS After",  f"{dqs_after} / 100",
                   delta=round(dqs_after - dqs_before, 2))
 
-        # ── Preview ───────────────────────────────────────────────
+        #  Preview 
         st.subheader("Cleaned Dataset Preview")
         st.dataframe(df_cleaned.head(20), use_container_width=True)
 
-    # ── Download — outside button block so radio reruns work ─────
+    #  Download 
     if st.session_state.get('cleaned_df') is not None:
         df_cleaned  = st.session_state['cleaned_df']
         original_name = st.session_state.get('original_name', 'dataset')
