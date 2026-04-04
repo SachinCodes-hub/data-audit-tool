@@ -97,7 +97,7 @@ def show_cleaning(df , uploaded_file):
         st.dataframe(df_cleaned.head(20), use_container_width=True)
 
         # ── Download ──────────────────────────────────────────────
-        # ── Download ──────────────────────────────────────────────
+        
         # ── Download ──────────────────────────────────────────────
         original_name = uploaded_file.name.rsplit(".", 1)[0]
         fmt = st.radio("Download format", ["CSV", "Excel"], horizontal=True)

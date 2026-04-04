@@ -41,9 +41,8 @@ with st.sidebar:
         <svg width="32" height="32" viewBox="0 0 44 44">
             <polygon points="22,4 38,4 46,18 38,32 22,32 14,18" 
                 fill="#8B5CF6" stroke="#8B5CF6" stroke-width="2"/>
-            <text x="22" y="18" text-anchor="middle" 
-                fill="white" font-size="12" font-weight="600" 
-                dy="0.35em">IQ</text>
+            <text x="22" y="21" text-anchor="middle" dominant-baseline="central"
+                fill="white" font-size="11" font-weight="700">IQ</text>
         </svg>
         <span style="font-size:20px; font-weight:600;">AuditIQ</span>
     </div>
@@ -150,4 +149,4 @@ else:
     with tab3:
         show_fault_detection(df)
     with tab4:
-        show_cleaning(df)
+        show_cleaning(df, uploaded)
