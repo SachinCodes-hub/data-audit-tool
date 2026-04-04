@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from utils.helpers import PLACEHOLDERS, compute_dqs
 from modules.runcleaningpipeline import run_cleaning_pipeline_ui
-
+import io
 def show_cleaning(df , uploaded_file):
     st.header("⚡ CleanIQ Pipeline")
     st.info("This will automatically clean your dataset using 8 steps. The cleaned file is available for download.")
@@ -98,13 +98,20 @@ def show_cleaning(df , uploaded_file):
 
         # ── Download ──────────────────────────────────────────────
         # ── Download ──────────────────────────────────────────────
-        original_name = uploaded_file.name.rsplit(".", 1)[0]  
-        clean_filename = f"{original_name}_cleaniq.csv"
+        # ── Download ──────────────────────────────────────────────
+        original_name = uploaded_file.name.rsplit(".", 1)[0]
+        fmt = st.radio("Download format", ["CSV", "Excel"], horizontal=True)
 
-        csv = df_cleaned.to_csv(index=False).encode("utf-8")
-        st.download_button(
-            "⬇️ Download Audit-Cleaned File",
-            data=csv,
-            file_name=clean_filename,
-            mime="text/csv",
-            )
+        if fmt == "CSV":
+            data = df_cleaned.to_csv(index=False).encode("utf-8")
+            fname = f"{original_name}_cleaniq.csv"
+            mime = "text/csv"
+        else:
+            output = io.BytesIO()
+            df_cleaned.to_excel(output, index=False, engine="openpyxl")
+            output.seek(0)
+            data = output
+            fname = f"{original_name}_cleaniq.xlsx"
+            mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+        st.download_button("⬇️ Download Audit-Cleaned File", data=data, file_name=fname, mime=mime)
