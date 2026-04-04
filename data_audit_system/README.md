@@ -1,72 +1,55 @@
-# DataLens — Data Audit System
+# ⬡ AuditIQ — Data Quality Platform
 
 > **Know your data. Before it breaks your model.**
 
-A professional-grade data quality auditing tool built for ML engineers, data scientists, and analysts. Upload any CSV or Excel file and get a complete quality audit in seconds — no code required.
+AuditIQ is an open-source, ISO 25012-aligned data quality platform built on Streamlit and Pandas. Upload any CSV or Excel dataset and receive a full audit — completeness scoring, statistical exploration, fault detection, and an automated 8-stage cleaning pipeline — all in one interface.
 
-**🔗 Live Demo:** [your-app.streamlit.app](https://your-app.streamlit.app)
+🔗 **Live Demo:** [auditiq-v094.onrender.com](https://auditiq-v094.onrender.com)
 
 ---
 
-## What is DataLens?
+## Table of Contents
 
-DataLens is an end-to-end data auditing tool that takes any raw dataset and gives you:
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Project Structure](#project-structure)
+- [How It Works](#how-it-works)
+- [CleanIQ Pipeline](#cleaniq-pipeline)
+- [DQS Scoring](#dqs-scoring)
+- [Screenshots](#screenshots)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
 
-- A **Data Quality Score (DQS)** out of 100, aligned with the ISO 25012 standard
-- A **7-dimension fault report** telling you exactly what's wrong and why
-- A **visual explorer** with distributions, correlations, outlier maps, and column deep dives
-- A **smart column classifier** that detects IDs, targets, constants, and high-cardinality columns
-- A **cleaned dataset** ready to drop straight into your ML pipeline
+---
+
+## Overview
+
+Data quality is the single biggest bottleneck in ML pipelines. AuditIQ was built to solve this — giving data scientists, analysts, and ML engineers a fast, visual, and reproducible way to audit and clean their datasets before modelling.
+
+AuditIQ computes a **Data Quality Score (DQS)** across 7 ISO 25012 dimensions, visualises distributions and outliers, detects structural faults, and runs an automated cleaning pipeline — outputting an ML-ready file in CSV or Excel format.
 
 ---
 
 ## Features
 
-### 📊 Dataset Overview
-- Shape, memory usage, null counts, duplicate detection
-- Full column details — dtype, null %, unique values, sample
-- Statistical summary for all columns
+| Module | Description |
+|---|---|
+| 📋 **Data Profile** | Schema, data types, memory footprint, null counts, statistical summary |
+| 📡 **Statistical Explorer** | Distributions, correlations, outliers, column deep dive |
+| ⚠️ **Fault Detection** | ISO 25012-compliant DQS scoring across 7 quality dimensions |
+| ⚡ **CleanIQ Pipeline** | Automated 8-stage remediation pipeline with before/after comparison |
 
-### 🔭 Data Explorer
-- **Smart Column Classifier** — auto-tags every column as numeric, categorical, ID, constant, datetime, high cardinality, or free text
-- **Distribution plots** — histogram + KDE for numeric, bar charts for categorical
-- **Box plot gallery** — visualise outliers across all numeric columns, inspect outlier rows
-- **Correlation heatmap** — Pearson matrix + interactive scatter plot with regression line
-- **Target column analyser** — class imbalance checker, distribution analysis, model readiness verdict
-- **Column deep dive** — full single-column report with ML encoding recommendation
-
-### 🚨 Fault Detection — ISO 25012 Aligned
-Scores your dataset across 7 dimensions with a weighted **Data Quality Score (DQS)**:
-
-| # | Dimension | Weight | What it checks |
-|---|-----------|--------|----------------|
-| D1 | Completeness | 28% | Null values, empty strings, disguised nulls (N/A, unknown, -, etc.) |
-| D2 | Uniqueness | 18% | Duplicate rows, constant columns, identical column pairs |
-| D3 | Consistency | 16% | Mixed types, case inconsistency, mixed date formats, encoding corruption |
-| D4 | Validity | 16% | Extreme outliers (3×IQR), impossible domain values (negative age, etc.) |
-| D5 | Accuracy | 10% | Heavy skew (>3.0), label noise (male vs m vs Male) |
-| D6 | Structure | 7% | Bad column names, wrong dtypes, unnamed columns, low row/col ratio |
-| D7 | Correlation | 5% | Highly correlated pairs (r > 0.95), near-duplicate columns (r > 0.999) |
-
-Every dimension shows:
-- A score out of 100
-- Colour-coded findings explaining exactly what was found
-- A radar chart showing your quality profile
-- A priority action table — sorted by impact on your DQS
-
-### 🧹 Cleaning Pipeline
-8-step automated cleaning in one click:
-
-1. Standardise column names (lowercase, no special characters)
-2. Remove fully empty rows
-3. Replace placeholder values with NaN
-4. Drop columns with >70% missing data
-5. Fill remaining nulls (median for numeric, mode for categorical)
-6. Remove duplicate rows
-7. Standardise text formatting (strip, lowercase)
-8. Cap outliers at 3×IQR (Winsorize)
-
-Before/after comparison with DQS improvement metric + one-click download of cleaned file.
+**Key highlights:**
+- ISO 25012 aligned DQS scoring
+- 8-step automated cleaning pipeline (CleanIQ Engine)
+- Before vs After cleaning comparison with delta metrics
+- Export cleaned dataset as CSV or Excel
+- Supports files up to 500MB
+- Dark mode UI with professional design system
+- Deployed and accessible via browser — no installation needed
 
 ---
 
@@ -74,137 +57,171 @@ Before/after comparison with DQS improvement metric + one-click download of clea
 
 | Layer | Technology |
 |---|---|
-| UI Framework | Streamlit |
+| Frontend / UI | Streamlit |
 | Data Processing | Pandas, NumPy |
-| Visualisation | Plotly |
-| File Support | CSV, Excel (.xlsx, .xls) |
-| Standard | ISO 25012 Data Quality |
-| Language | Python 3.9+ |
+| Visualisation | Plotly, Matplotlib |
+| File Handling | openpyxl, io |
+| Deployment | Render |
+| Language | Python 3.10+ |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.10 or higher
+- pip
+
+### Installation
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/yourusername/auditiq.git
+cd auditiq
+
+# 2. Create a virtual environment
+python -m venv venv
+source venv/bin/activate        # On Windows: venv\Scripts\activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Run the app
+streamlit run app.py
+```
+
+The app will open at `http://localhost:8501`
+
+### Requirements
+
+```
+streamlit
+pandas
+numpy
+plotly
+openpyxl
+Pillow
+```
 
 ---
 
 ## Project Structure
 
 ```
-data-audit-system/
-│
-├── app.py                  ← main entry point + navigation
-│
-├── modules/
-│   ├── overview.py         ← dataset overview (Phase 1)
-│   ├── fault_detection.py  ← DQS engine D1–D7 (Phase 2)
-│   ├── explorer.py         ← visual explorer + ML readiness (Phase 3)
-│   └── cleaning.py         ← cleaning pipeline (Phase 4)
-│
-├── utils/
-│   └── helpers.py          ← shared: file loader, DQS calculator, constants
-│
-├── assets/
-│   └── style.css           ← custom theme (dark/light adaptive)
-│
+auditiq/
+├── app.py                        # Main entry point, routing, sidebar
 ├── requirements.txt
-└── README.md
+├── assets/
+│   ├── style.css                 # Global design system
+│   └── iqlogofinal.jpeg          # App icon
+├── modules/
+│   ├── overview.py               # Data Profile tab
+│   ├── explorer.py               # Statistical Explorer tab
+│   ├── fault_detection.py        # Fault Detection & DQS tab
+│   ├── cleaning.py               # CleanIQ Pipeline tab
+│   └── runcleaningpipeline.py    # Terminal-style pipeline UI
+└── utils/
+    └── helpers.py                # DQS computation, file loading, constants
 ```
 
 ---
 
-## Getting Started
+## How It Works
 
-### Run locally
+### Upload
+Drag and drop any CSV or Excel file (up to 500MB) into the sidebar. AuditIQ automatically detects file type, loads it into a Pandas DataFrame, and displays file metadata.
 
-```bash
-# 1. Clone the repo
-git clone https://github.com/YOUR_USERNAME/data-audit-system.git
-cd data-audit-system
-
-# 2. Install dependencies
-pip install -r requirements.txt
-
-# 3. Run
-streamlit run app.py
+### Audit Flow
+```
+Ingest → Profile → Remediate → Export
 ```
 
-App opens at `http://localhost:8501`
-
-### requirements.txt
-
-```
-streamlit>=1.32.0
-pandas>=2.0.0
-numpy>=1.26.0
-plotly>=5.20.0
-openpyxl>=3.1.0
-```
+1. **Ingest** — File uploaded, parsed, stored in session state
+2. **Profile** — Schema analysis, null counts, type detection, memory usage
+3. **Remediate** — CleanIQ 8-step pipeline runs automatically
+4. **Export** — Download cleaned file as CSV or Excel with `_cleaniq` suffix
 
 ---
 
-## How the DQS Works
+## CleanIQ Pipeline
 
-The **Data Quality Score** is a weighted average across 7 dimensions, aligned with ISO 25012:
+The CleanIQ Engine runs 8 automated remediation steps in sequence:
 
-```
-DQS = (D1 × 0.28) + (D2 × 0.18) + (D3 × 0.16) +
-      (D4 × 0.16) + (D5 × 0.10) + (D6 × 0.07) + (D7 × 0.05)
-```
-
-Each dimension uses **tiered penalties** — not linear deductions. A dataset with 1% missing values is treated very differently from one with 40% missing. The score is purely based on data quality — small clean datasets score just as high as large ones.
-
-| Score | Grade | Meaning |
+| Step | Operation | Detail |
 |---|---|---|
-| 85–100 | A 🟢 | High quality — ready for ML |
-| 70–84 | B 🟡 | Good — minor issues to fix |
-| 50–69 | C 🟠 | Moderate — clean before training |
-| 0–49 | D 🔴 | Poor — significant work needed |
+| 1 | Column Name Standardisation | Strip, lowercase, replace special chars with `_` |
+| 2 | Empty Row Removal | Drop rows where all values are null |
+| 3 | Placeholder → NaN | Convert `"n/a"`, `"null"`, `"-"`, `"unknown"` etc. to `NaN` |
+| 4 | High-Missing Column Drop | Drop columns with >70% missing values |
+| 5 | Missing Value Imputation | Numeric → median fill, Categorical → mode fill |
+| 6 | Duplicate Removal | Drop exact duplicate rows, keep first |
+| 7 | Text Formatting | Strip whitespace, lowercase all string columns |
+| 8 | Outlier Capping | Winsorize at 3×IQR per numeric column |
+
+Each step is displayed in a terminal-style log UI so you can see exactly what is happening to your data in real time.
 
 ---
 
-## Supported File Formats
+## DQS Scoring
 
-| Format | Notes |
+AuditIQ computes a **Data Quality Score (DQS)** aligned with the ISO/IEC 25012 standard across 7 dimensions:
+
+| Dimension | Formula |
 |---|---|
-| `.csv` | Auto-detects encoding (UTF-8, Latin-1, CP1252) |
-| `.xlsx` | Multi-sheet support — pick your sheet |
-| `.xls` | Legacy Excel format |
+| Completeness | `max(0, 100 - missing_rate × 150)` |
+| Uniqueness | `max(0, 100 - duplicate_rate × 200)` |
+| Consistency | Based on type uniformity and formatting |
+| Validity | Value range and constraint checks |
+| Accuracy | Cross-column logical checks |
+| Structure | Schema regularity score |
+| Correlation | Feature relationship health |
 
-**Limits:** Max 100MB per file · Max 500,000 rows loaded (with warning)
+**Final DQS** is a weighted average across all 7 dimensions, scored out of 100.
 
----
-
-## Screenshots
-
-> *(Add screenshots here after deployment)*
-
-| Welcome Screen | Fault Detection | Data Explorer |
-|---|---|---|
-| ![welcome](screenshots/welcome.png) | ![faults](screenshots/faults.png) | ![explorer](screenshots/explorer.png) |
+After running CleanIQ, AuditIQ shows DQS Before vs After with delta, giving you a measurable proof of data quality improvement.
 
 ---
 
 ## Roadmap
 
+- [ ] Support for JSON and Parquet file formats
+- [ ] Column-level DQS drill-down
+- [ ] Custom cleaning rules configuration
 - [ ] PDF audit report export
-- [ ] ML Readiness Score (dedicated tab)
-- [ ] Excel audit report download (one sheet per dimension)
-- [ ] Theme toggle (dark/light) inside the app
-- [ ] Column encoding suggestions for sklearn pipelines
-- [ ] Data leakage detector
+- [ ] Multi-file comparison mode
+- [ ] REST API endpoint for pipeline automation
 
 ---
 
-## About
+## Contributing
 
-Built as a portfolio project to demonstrate end-to-end data engineering and Streamlit development skills.
+Contributions are welcome. To contribute:
 
-**Author:** [Your Name]
-**LinkedIn:** [your linkedin]
-**GitHub:** [your github]
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Commit your changes (`git commit -m 'Add your feature'`)
+4. Push to the branch (`git push origin feature/your-feature`)
+5. Open a Pull Request
+
+Please follow PEP8 and keep functions modular.
 
 ---
 
 ## License
 
-MIT License — free to use, modify, and distribute.
+This project is licensed under the MIT License. See `LICENSE` for details.
 
 ---
 
-*Built with Python · Streamlit · Pandas · Plotly*
+## Author
+
+**sachin karale**
+
+Built by a open source contributor passionate about data quality and ML engineering.
+
+🔗 [Live App](https://auditiq-v094.onrender.com) · [LinkedIn](#) · [GitHub](#)
+
+---
+
+*AuditIQ · Data Quality Platform · v1.0.0 · Built on Streamlit & Pandas*
