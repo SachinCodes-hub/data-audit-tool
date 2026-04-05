@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataAudit — Your data, deeply understood.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ANIMATED BACKGROUND -->
+<div class="bg-canvas">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+  <div class="bg-grid"></div>
+</div>
+
+<!-- PROGRESS OVERLAY -->
+<div class="progress-overlay" id="progressOverlay" style="display:none;">
+  <div class="progress-pct" id="progressPct">0%</div>
+  <div class="progress-title">Analyzing Dataset</div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progressBar"></div>
+  </div>
+  <div class="progress-step-text" id="progressStep">Initializing...</div>
+</div>
+
+<div id="app">
+
+<!-- ================================================================
+     LANDING PAGE
+================================================================ -->
+<section id="landing">
+
+  <div class="brand-badge">DataAudit · Premium Data Intelligence</div>
+
+  <h1 class="hero-title">
+    <span class="line-1">Your data,</span>
+    <span class="line-2">deeply understood.</span>
+  </h1>
+
+  <p class="hero-sub">
+    Upload any CSV dataset. Get <strong>enterprise-grade quality scoring</strong>,
+    intelligent cleaning, and deep insights — instantly.
+  </p>
+
+  <div class="cta-group">
+    <button class="btn-primary" onclick="document.getElementById('fileInput').click()">
+      ⚡ Analyze Dataset
+    </button>
+    <button class="btn-secondary" onclick="loadDemo()">
+      ◈ Try Demo
+    </button>
+  </div>
+
+  <div class="upload-zone">
+    <div class="drop-area" id="dropArea" onclick="document.getElementById('fileInput').click()">
+      <div class="drop-icon">📂</div>
+      <div class="drop-title">Drop your CSV here</div>
+      <div class="drop-sub">or click to browse files</div>
+      <div class="drop-formats">
+        <span class="format-tag">.CSV</span>
+        <span class="format-tag">.TSV</span>
+        <span class="format-tag">Up to 50MB</span>
+      </div>
+    </div>
+    <input type="file" id="fileInput" accept=".csv,.tsv,.txt">
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-value">14+</div>
+      <div class="stat-label">Quality Metrics</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">14</div>
+      <div class="stat-label">Cleaning Steps</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">100%</div>
+      <div class="stat-label">Browser-Native</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">0</div>
+      <div class="stat-label">API Calls</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ================================================================
+     DASHBOARD
+================================================================ -->
+<section id="dashboard">
+
+  <!-- NAV -->
+  <nav class="dash-nav">
+    <div class="nav-brand">
+      <div class="nav-brand-dot"></div>
+      DataAudit
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="overview">Overview</button>
+      <button class="nav-tab" data-tab="columns">Columns</button>
+      <button class="nav-tab" data-tab="clean">Clean</button>
+      <button class="nav-tab" data-tab="insights">Insights</button>
+      <button class="nav-tab" data-tab="compare">Before/After</button>
+      <button class="nav-tab" data-tab="chat">AI Chat</button>
+      <button class="nav-tab" data-tab="code">Code</button>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-icon" id="downloadBtn" title="Download Cleaned CSV">💾</button>
+      <button class="btn-sm" onclick="resetApp()">← New File</button>
+    </div>
+  </nav>
+
+  <!-- FILE INFO BAR -->
+  <div class="file-info-bar">
+    <div class="fi-item">
+      <div class="fi-label">File</div>
+      <div class="fi-val" id="fi-name">—</div>
+    </div>
+    <div class="fi-sep"></div>
+    <div class="fi-item">
+      <div class="fi-label">Rows</div>
+      <div class="fi-val" id="fi-rows">—</div>
+    </div>
+    <div class="fi-sep"></div>
+    <div class="fi-item">
+      <div class="fi-label">Columns</div>
+      <div class="fi-val" id="fi-cols">—</div>
+    </div>
+    <div class="fi-sep"></div>
+    <div class="fi-item">
+      <div class="fi-label">Size</div>
+      <div class="fi-val" id="fi-size">—</div>
+    </div>
+    <div class="fi-sep"></div>
+    <div class="fi-item">
+      <div class="fi-label">DQS Score</div>
+      <div class="fi-val" id="fi-dqs">—</div>
+    </div>
+  </div>
+
+  <!-- ===== OVERVIEW TAB ===== -->
+  <div class="tab-panel active" id="tab-overview">
+
+    <!-- DQS Hero -->
+    <div class="dqs-hero" id="dqsHero">
+      <div class="dqs-ring-wrap">
+        <svg width="180" height="180" viewBox="0 0 180 180">
+          <circle cx="90" cy="90" r="75" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="12"/>
+          <circle id="dqsRingTrack" cx="90" cy="90" r="75" fill="none"
+            stroke="url(#dqsGrad)" stroke-width="12"
+            stroke-linecap="round"
+            stroke-dasharray="471"
+            stroke-dashoffset="471"
+            style="transition: stroke-dashoffset 1.4s cubic-bezier(0.23,1,0.32,1)"/>
+          <defs>
+            <linearGradient id="dqsGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00FFC6"/>
+              <stop offset="100%" stop-color="#2979FF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="dqs-ring-center">
+          <div class="dqs-score-num" id="dqsNum" style="color:var(--primary)">—</div>
+          <div class="dqs-score-label">DQS</div>
+        </div>
+      </div>
+
+      <div class="dqs-breakdown">
+        <div class="dqs-breakdown-title">Data Quality Score</div>
+        <div class="dqs-breakdown-sub">Composite weighted metric across 14 dimensions</div>
+        <div class="metric-list" id="metricList"></div>
+      </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="overview-grid" id="statCards"></div>
+
+    <!-- Issues & Data Preview -->
+    <div class="two-col" style="margin-bottom:20px;">
+      <div class="glass-card">
+        <div class="section-hd">
+          <h3>Detected Issues</h3>
+          <span class="sh-badge" id="issueCount">—</span>
+        </div>
+        <div id="issueChips"></div>
+      </div>
+      <div class="glass-card">
+        <div class="section-hd">
+          <h3>Column Types</h3>
+        </div>
+        <canvas id="typeChart" height="180"></canvas>
+      </div>
+    </div>
+
+    <!-- Data Preview Table -->
+    <div class="glass-card">
+      <div class="section-hd">
+        <h3>Data Preview</h3>
+        <span class="sh-badge">First 20 rows</span>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table" id="previewTable"></table>
+      </div>
+    </div>
+
+  </div><!-- /overview -->
+
+  <!-- ===== COLUMNS TAB ===== -->
+  <div class="tab-panel" id="tab-columns">
+    <div class="glass-card" style="margin-bottom:20px;">
+      <div class="section-hd">
+        <h3>Column Intelligence</h3>
+        <span class="sh-badge" id="colCount">—</span>
+      </div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">
+        Deep per-column analysis with quality scores, statistics, and distribution previews.
+      </p>
+      <div class="col-cards-grid" id="colCards"></div>
+    </div>
+  </div>
+
+  <!-- ===== CLEAN TAB ===== -->
+  <div class="tab-panel" id="tab-clean">
+
+    <div class="two-col" style="margin-bottom:24px;">
+
+      <!-- Strategy -->
+      <div class="glass-card">
+        <div class="card-label">Cleaning Mode</div>
+        <div class="card-title" style="margin-bottom:16px;">Select Strategy</div>
+        <div class="strategy-selector">
+          <div class="strategy-card selected-strategy" data-strategy="conservative" onclick="selectStrategy(this,'conservative')">
+            <div class="strategy-icon">🛡️</div>
+            <div class="strategy-name">Conservative</div>
+            <div class="strategy-sub">Safe changes only. Preserves data structure.</div>
+          </div>
+          <div class="strategy-card" data-strategy="balanced" onclick="selectStrategy(this,'balanced')">
+            <div class="strategy-icon">⚖️</div>
+            <div class="strategy-name">Balanced</div>
+            <div class="strategy-sub">Optimal tradeoff. Recommended for most.</div>
+          </div>
+          <div class="strategy-card" data-strategy="aggressive" onclick="selectStrategy(this,'aggressive')">
+            <div class="strategy-icon">🔥</div>
+            <div class="strategy-name">Aggressive</div>
+            <div class="strategy-sub">Maximum cleaning. May alter distributions.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expected Impact -->
+      <div class="glass-card">
+        <div class="card-label">Expected Impact</div>
+        <div class="card-title" style="margin-bottom:16px;">Cleaning Preview</div>
+        <div id="impactPreview"></div>
+        <button class="run-pipeline-btn" id="runPipelineBtn" onclick="runPipeline()">⚡ Run Full Pipeline</button>
+      </div>
+
+    </div>
+
+    <!-- Pipeline Steps -->
+    <div class="glass-card">
+      <div class="section-hd">
+        <h3>Cleaning Pipeline</h3>
+        <span class="sh-badge">14 Steps</span>
+      </div>
+      <div class="pipeline-steps" id="pipelineSteps"></div>
+    </div>
+
+  </div>
+
+  <!-- ===== INSIGHTS TAB ===== -->
+  <div class="tab-panel" id="tab-insights">
+
+    <div class="two-col" style="margin-bottom:20px;">
+      <!-- Correlation Heatmap -->
+      <div class="glass-card">
+        <div class="section-hd">
+          <h3>Correlation Matrix</h3>
+          <span class="sh-badge">Numeric Columns</span>
+        </div>
+        <div class="heatmap-wrap" id="heatmapWrap"></div>
+      </div>
+
+      <!-- Distribution charts -->
+      <div class="glass-card">
+        <div class="section-hd">
+          <h3>Distributions</h3>
+        </div>
+        <div id="distCharts"></div>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-bottom:20px;">
+      <!-- Anomaly Detection -->
+      <div class="glass-card">
+        <div class="section-hd">
+          <h3>Anomaly Detection</h3>
+          <span class="sh-badge">Z-Score + IQR</span>
+        </div>
+        <div id="anomalyTable"></div>
+      </div>
+
+      <!-- Hidden Patterns -->
+      <div class="glass-card">
+        <div class="section-hd">
+          <h3>Hidden Pattern Detector</h3>
+          <span class="sh-badge">K-Means Sim</span>
+        </div>
+        <div class="cluster-wrap">
+          <canvas id="clusterChart"></canvas>
+        </div>
+        <div class="cluster-legend" id="clusterLegend"></div>
+      </div>
+    </div>
+
+    <!-- Feature Stats -->
+    <div class="glass-card">
+      <div class="section-hd">
+        <h3>Feature Statistics</h3>
+        <span class="sh-badge">Skewness & Kurtosis</span>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table" id="statsTable"></table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== COMPARE TAB ===== -->
+  <div class="tab-panel" id="tab-compare">
+
+    <div class="ba-grid">
+      <div class="glass-card ba-card" style="border-color:rgba(255,107,107,0.2);">
+        <div class="ba-label" style="color:#FF6B6B;">◈ Before Cleaning</div>
+        <div class="ba-score" id="baScoreBefore" style="color:#FF6B6B;">—</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:8px;" id="baRowsBefore">—</div>
+      </div>
+      <div class="glass-card ba-card" style="border-color:rgba(0,255,198,0.2);">
+        <div class="ba-label" style="color:var(--primary);">◈ After Cleaning</div>
+        <div class="ba-score" id="baScoreAfter" style="color:var(--primary);">—</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:8px;" id="baRowsAfter">—</div>
+      </div>
+    </div>
+
+    <div class="glass-card" style="margin-bottom:20px;">
+      <div class="section-hd"><h3>Metric Comparison</h3></div>
+      <canvas id="compareChart" height="200"></canvas>
+    </div>
+
+    <div class="glass-card">
+      <div class="section-hd"><h3>Change Log</h3><span class="sh-badge" id="changeCount">—</span></div>
+      <div id="changeLog"></div>
+    </div>
+
+  </div>
+
+  <!-- ===== CHAT TAB ===== -->
+  <div class="tab-panel" id="tab-chat">
+    <div class="glass-card" style="padding:0;overflow:hidden;">
+      <div style="padding:20px 24px;border-bottom:1px solid var(--glass-border);">
+        <div class="card-title">🤖 Data Intelligence Chat</div>
+        <div class="card-sub">Ask anything about your dataset — powered by rule-based insights</div>
+      </div>
+      <div class="quick-qs" id="quickQs"></div>
+      <div class="chat-wrap">
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-wrap">
+          <input class="chat-input" id="chatInput" placeholder="Ask about your data..." onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="chat-send" onclick="sendChat()">Send →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CODE TAB ===== -->
+  <div class="tab-panel" id="tab-code">
+
+    <div style="margin-bottom:20px;">
+      <div class="glass-card">
+        <div class="section-hd">
+          <h3>Python Cleaning Code</h3>
+          <button class="code-copy" onclick="copyCode('pyCode')">Copy</button>
+        </div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python · pandas</span>
+          </div>
+          <pre id="pyCode"></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-card" style="margin-bottom:20px;">
+      <div class="section-hd">
+        <h3>JavaScript Cleaning Code</h3>
+        <button class="code-copy" onclick="copyCode('jsCode')">Copy</button>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">JavaScript</span>
+        </div>
+        <pre id="jsCode"></pre>
+      </div>
+    </div>
+
+    <div class="glass-card">
+      <div class="section-hd"><h3>Export Dataset</h3></div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">
+        Download the cleaned dataset as a CSV file, ready for modeling or further analysis.
+      </p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <button class="download-btn" onclick="downloadCleaned()">
+          💾 Download Cleaned CSV
+        </button>
+        <button class="download-btn" style="background:linear-gradient(135deg,var(--secondary),#1A5FCC);" onclick="downloadOriginal()">
+          📋 Download Original CSV
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</section><!-- /dashboard -->
+
+</div><!-- /app -->
+
+<script src="script.js"></script>
+</body>
+</html>
