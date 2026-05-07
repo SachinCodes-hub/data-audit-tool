@@ -2,9 +2,7 @@ import streamlit as st
 import pandas as pd
 from utils.helpers import get_memory_usage
 
-def show_overview(df, file_name: str, file_size: int):
-
-    # ── Page header ───────────────────────────────────────────────
+def show_overview(df, file_name: str, file_size: 
     st.markdown(f"""
     <div style='margin-bottom: 28px'>
         <span class='das-label'>DATASET OVERVIEW</span>
@@ -20,7 +18,7 @@ def show_overview(df, file_name: str, file_size: int):
     </div>
     """, unsafe_allow_html=True)
 
-    # ── KPI row ───────────────────────────────────────────────────
+    
     c1, c2, c3, c4, c5 = st.columns(5)
     c1.metric("Rows",       f"{df.shape[0]:,}")
     c2.metric("Columns",    df.shape[1])
@@ -30,7 +28,7 @@ def show_overview(df, file_name: str, file_size: int):
 
     st.divider()
 
-    # ── Preview ───────────────────────────────────────────────────
+
     st.markdown("#### Preview")
     tab_head, tab_tail = st.tabs(["First 5 rows", "Last 5 rows"])
     with tab_head:
@@ -40,7 +38,7 @@ def show_overview(df, file_name: str, file_size: int):
 
     st.divider()
 
-    # ── Column Details ────────────────────────────────────────────
+    
     st.markdown("#### Column Details")
     details = pd.DataFrame({
         "Column":   df.columns,
@@ -56,6 +54,6 @@ def show_overview(df, file_name: str, file_size: int):
 
     st.divider()
 
-    # ── Statistical Summary ───────────────────────────────────────
+    
     st.markdown("#### Statistical Summary")
     st.dataframe(df.describe(include="all"), use_container_width=True)
