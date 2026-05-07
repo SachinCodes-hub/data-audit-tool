@@ -21,12 +21,12 @@ def classify_columns(df: pd.DataFrame) -> dict:
         nunique = series.nunique(dropna=True)
         col_lower = col.lower().strip()
 
-        # Constant — zero information
+        
         if nunique <= 1:
             tags[col] = "constant"
             continue
 
-        # ID-like — all or nearly all unique + name hint
+        
         id_keywords = ["id", "index", "uuid", "key", "code", "no", "num", "number", "ref"]
         is_id_name  = any(col_lower == k or col_lower.endswith(f"_{k}") or
                           col_lower.startswith(f"{k}_") for k in id_keywords)
@@ -34,7 +34,7 @@ def classify_columns(df: pd.DataFrame) -> dict:
             tags[col] = "id"
             continue
 
-        # Datetime
+        
         if pd.api.types.is_datetime64_any_dtype(series):
             tags[col] = "datetime"
             continue
@@ -45,22 +45,22 @@ def classify_columns(df: pd.DataFrame) -> dict:
                 tags[col] = "datetime"
                 continue
 
-        # Numeric
+        
         if pd.api.types.is_numeric_dtype(series):
             if nunique == 2:
                 tags[col] = "binary"
             elif nunique <= 15:
-                tags[col] = "categorical"   # low-cardinality numeric → treat as cat
+                tags[col] = "categorical"   
             else:
                 tags[col] = "numeric"
             continue
 
-        # Categorical vs high-cardinality vs free text
+        
         if series.dtype == object:
             if nunique <= 20:
                 tags[col] = "categorical"
             elif nunique / n > 0.5:
-                tags[col] = "text"          # too many unique → probably free text
+                tags[col] = "text"          
             else:
                 tags[col] = "high_cardinality"
             continue
@@ -71,7 +71,7 @@ def classify_columns(df: pd.DataFrame) -> dict:
 
 
 
-# MAIN EXPLORER PAGE
+
 
 
 def show_explorer(df: pd.DataFrame):
@@ -80,7 +80,7 @@ def show_explorer(df: pd.DataFrame):
 
     tags = classify_columns(df)
 
-    #  Column Type Summary 
+    
     st.subheader("🏷️ Smart Column Classifier")
     st.caption("Auto-detected column roles — helps you know what to use in your model")
 
@@ -96,7 +96,7 @@ def show_explorer(df: pd.DataFrame):
         "unknown":          ("❓", "Unknown",               "#eeeeee"),
     }
 
-    # Build summary table
+    
     rows = []
     for col, tag in tags.items():
         emoji, label, color = TAG_META.get(tag, ("❓", tag, "#eee"))
@@ -112,7 +112,7 @@ def show_explorer(df: pd.DataFrame):
 
     st.dataframe(pd.DataFrame(rows), use_container_width=True)
 
-    # Warnings for ML-dangerous columns
+    
     id_cols       = [c for c, t in tags.items() if t == "id"]
     constant_cols = [c for c, t in tags.items() if t == "constant"]
     text_cols     = [c for c, t in tags.items() if t == "text"]
@@ -126,7 +126,7 @@ def show_explorer(df: pd.DataFrame):
 
     st.divider()
 
-    #  Section tabs
+
     t1, t2, t3, t4, t5 = st.tabs([
         "📊 Distributions",
         "📦 Box Plots",
@@ -151,8 +151,7 @@ def show_explorer(df: pd.DataFrame):
         _show_column_deep_dive(df, tags)
 
 
-#
-# TAB 1 — DISTRIBUTIONS
+
 
 
 def _show_distributions(df, tags):
@@ -166,7 +165,7 @@ def _show_distributions(df, tags):
         st.info("No plottable columns found.")
         return
 
-    # Numeric distributions — grid layout
+    
     if numeric_cols:
         st.markdown("#### Numeric Columns")
         cols_per_row = 2
@@ -178,7 +177,7 @@ def _show_distributions(df, tags):
                     fig = px.histogram(
                         data, x=data,
                         nbins=min(50, data.nunique()),
-                        marginal="box",          # box plot on top
+                        marginal="box",          
                         title=f"{col}",
                         labels={"x": col},
                         color_discrete_sequence=["#4fc3f7"],
@@ -190,13 +189,13 @@ def _show_distributions(df, tags):
                     )
                     st.plotly_chart(fig, use_container_width=True)
 
-                    # Key stats under the chart
+                    
                     sk = round(float(data.skew()), 2)
                     sk_label = "⚠️ Right skew" if sk > 1 else "⚠️ Left skew" if sk < -1 else "✅ Normal-ish"
                     st.caption(f"Mean: {data.mean():.2f} · Median: {data.median():.2f} · "
                                f"Std: {data.std():.2f} · Skew: {sk} {sk_label}")
 
-    # Categorical distributions
+    
     if categorical_cols:
         st.markdown("#### Categorical Columns")
         cols_per_row = 2
@@ -229,7 +228,7 @@ def _show_distributions(df, tags):
 
 
 
-# TAB 2 — BOX PLOTS
+
 
 
 def _show_boxplots(df, tags):
@@ -242,7 +241,7 @@ def _show_boxplots(df, tags):
         st.info("No numeric columns found for box plot analysis.")
         return
 
-    # All columns in one combined box plot
+    
     st.markdown("#### All Numeric Columns — Combined View")
     fig = go.Figure()
     for col in numeric_cols:
@@ -261,7 +260,7 @@ def _show_boxplots(df, tags):
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    # Per-column detail with outlier rows
+    
     st.markdown("#### Inspect Outlier Rows")
     selected = st.selectbox("Pick a column to inspect its outliers", numeric_cols, key="box_col")
 
@@ -288,7 +287,7 @@ def _show_boxplots(df, tags):
 
 
 
-# TAB 3 — CORRELATIONS
+
 
 
 def _show_correlations(df, tags):
@@ -300,7 +299,7 @@ def _show_correlations(df, tags):
         st.info("Need at least 2 numeric columns for correlation analysis.")
         return
 
-    # Heatmap
+    
     st.markdown("#### Correlation Heatmap")
     corr = df[numeric_cols].corr()
     fig = px.imshow(
@@ -314,7 +313,7 @@ def _show_correlations(df, tags):
     fig.update_layout(margin=dict(t=50, b=10))
     st.plotly_chart(fig, use_container_width=True)
 
-    # Scatter plot — user picks 2 columns
+    
     st.markdown("#### Scatter Plot — Pick Any Two Columns")
     col1, col2 = st.columns(2)
     with col1:
@@ -323,7 +322,7 @@ def _show_correlations(df, tags):
         y_col = st.selectbox("Y axis", numeric_cols,
                              index=min(1, len(numeric_cols)-1), key="scatter_y")
 
-    # Optional colour by categorical
+    
     cat_cols = [c for c, t in tags.items() if t == "categorical"]
     color_col = st.selectbox("Colour by (optional)",
                              ["None"] + cat_cols, key="scatter_color")
@@ -360,14 +359,14 @@ def _show_correlations(df, tags):
 
 
 
-# TAB 4 — TARGET COLUMN ANALYSIS
+
 
 
 def _show_target_analysis(df, tags):
     st.subheader("🎯 Target Column Analysis")
     st.caption("Pick your ML target column — we'll analyse it for model readiness")
 
-    # Exclude IDs and constants from target options
+    
     valid_targets = [c for c, t in tags.items() if t not in ("id", "constant", "text")]
 
     if not valid_targets:
@@ -382,7 +381,7 @@ def _show_target_analysis(df, tags):
     tag = tags[target]
     st.markdown(f"**Detected type:** `{tag}`")
 
-    # ── Classification target ─────────────────────────────────────
+    
     if tag in ("categorical", "binary"):
         vc = df[target].value_counts()
         total = vc.sum()
@@ -398,7 +397,7 @@ def _show_target_analysis(df, tags):
         fig.update_layout(coloraxis_showscale=False, height=350)
         st.plotly_chart(fig, use_container_width=True)
 
-        # Imbalance metrics
+    
         majority_pct = vc.values[0] / total * 100
         minority_pct = vc.values[-1] / total * 100
         imbalance_ratio = vc.values[0] / max(vc.values[-1], 1)
@@ -408,7 +407,7 @@ def _show_target_analysis(df, tags):
         col2.metric("Majority Class %", f"{majority_pct:.1f}%")
         col3.metric("Imbalance Ratio", f"{imbalance_ratio:.1f}x")
 
-        # Verdict
+        
         if imbalance_ratio > 10:
             st.error("🔴 **Severe class imbalance** — use SMOTE, class weights, or oversample minority class before training.")
         elif imbalance_ratio > 3:
@@ -416,14 +415,14 @@ def _show_target_analysis(df, tags):
         else:
             st.success("✅ **Classes are reasonably balanced** — good to train.")
 
-        # Pie chart
+        
         fig2 = px.pie(
             values=vc.values, names=vc.index.astype(str),
             title="Class Share", hole=0.4
         )
         st.plotly_chart(fig2, use_container_width=True)
 
-    # Regression target 
+    
     elif tag == "numeric":
         data = df[target].dropna()
 
@@ -454,7 +453,7 @@ def _show_target_analysis(df, tags):
 
 
 
-# TAB 5 — COLUMN DEEP DIVE
+
 
 
 def _show_column_deep_dive(df, tags):
@@ -469,7 +468,7 @@ def _show_column_deep_dive(df, tags):
     tag  = tags.get(selected, "unknown")
     data = df[selected]
 
-    # Header info 
+
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Detected Type", tag)
     col2.metric("Null %", f"{data.isnull().mean()*100:.1f}%")
@@ -478,7 +477,7 @@ def _show_column_deep_dive(df, tags):
 
     st.divider()
 
-    #  Encoding suggestion 
+    
     ENCODING_ADVICE = {
         "numeric":          ("✅ Ready to use", "No encoding needed. Scale with StandardScaler or MinMaxScaler if needed."),
         "binary":           ("✅ Ready to use", "Binary column. Encode as 0/1 if not already numeric."),
@@ -497,7 +496,7 @@ def _show_column_deep_dive(df, tags):
 
     st.divider()
 
-    # Visual + stats 
+    
     if tag in ("numeric",):
         clean = data.dropna()
         fig = px.histogram(clean, x=clean, nbins=50, marginal="box",
