@@ -21,15 +21,15 @@ def show_fault_detection(df):
     findings = {}    
 
     
-    # D1 — COMPLETENESS (28%)
-    # ISO def: degree to which data has values for all expected attributes
+    
+    
     
     with st.expander("D1 — Completeness (28%)", expanded=True):
 
         null_count = df.isnull().sum().sum()
         total_cells = df.shape[0] * df.shape[1]
 
-        # Detect disguised nulls (placeholders + empty strings)
+        
         disguised = 0
         for col in df.select_dtypes("object").columns:
             vals = df[col].dropna().astype(str)
@@ -39,22 +39,22 @@ def show_fault_detection(df):
         true_missing = null_count + disguised
         missing_rate = true_missing / total_cells
 
-        # Tiered penalty — not linear
-        # Why: 2% missing is noise, 40% missing is a crisis
+        
+        
         if missing_rate == 0:
             score = 100.0
-        elif missing_rate < 0.01:      # <1% missing → tiny penalty
+        elif missing_rate < 0.01:      
             score = 98.0
-        elif missing_rate < 0.05:      # 1–5%
+        elif missing_rate < 0.05:      
             score = 90 - (missing_rate * 200)
-        elif missing_rate < 0.20:      # 5–20%
+        elif missing_rate < 0.20:      
             score = 80 - (missing_rate * 150)
-        else:                          # >20% → severe
+        else:                          
             score = max(0, 50 - (missing_rate * 100))
 
         scores["completeness"] = round(score, 2)
 
-        # Per-column breakdown
+        
         col_missing = (df.isnull().sum() / len(df) * 100).round(1)
         col_missing = col_missing[col_missing > 0].sort_values(ascending=False)
 
@@ -85,18 +85,18 @@ def show_fault_detection(df):
             st.plotly_chart(fig, use_container_width=True)
 
     
-    # D2 — UNIQUENESS (18%)
-    # ISO def: degree to which data is free from duplication
+    
+
     
     with st.expander("D2 — Uniqueness (18%)"):
 
         exact_dupes = df.duplicated().sum()
         dupe_rate   = exact_dupes / len(df)
 
-        # Constant columns — zero information value
+        
         constant_cols = [c for c in df.columns if df[c].nunique(dropna=True) <= 1]
 
-        # Near-duplicate columns (same data, different name)
+        
         dup_col_pairs = []
         cols = list(df.columns)
         for i in range(len(cols)):
@@ -107,7 +107,7 @@ def show_fault_detection(df):
                 except Exception:
                     pass
 
-        # Scoring — row duplication is worse than column duplication
+        
         row_penalty   = min(dupe_rate * 150, 60)
         col_penalty   = min(len(constant_cols) * 5 + len(dup_col_pairs) * 8, 30)
         scores["uniqueness"] = round(max(0, 100 - row_penalty - col_penalty), 2)
@@ -127,8 +127,8 @@ def show_fault_detection(df):
         _render_dimension("D2 — Uniqueness", scores["uniqueness"], findings["uniqueness"])
 
    
-    # D3 — CONSISTENCY (16%)
-    # ISO def: degree to which data is free from contradiction
+    
+    
     
     with st.expander("D3 — Consistency (16%)"):
 
@@ -149,13 +149,13 @@ def show_fault_detection(df):
             if len(vals) == 0:
                 continue
 
-            # Mixed types
+            
             numeric_like = pd.to_numeric(vals, errors="coerce").notnull().sum()
             alpha_like   = vals.str.match(r"^[A-Za-z]").sum()
             if 0 < numeric_like < len(vals) and alpha_like > 0:
                 mixed_type_cols.append(col)
 
-            # Case inconsistency (only check low-cardinality cols)
+        
             if df[col].nunique() <= 50:
                 if vals.str.strip().str.lower().nunique() < vals.str.strip().nunique():
                     case_issue_cols.append(col)
@@ -194,9 +194,9 @@ def show_fault_detection(df):
         _render_dimension("D3 — Consistency", scores["consistency"], findings["consistency"])
 
     
-    # D4 — VALIDITY (16%)
-    # ISO def: degree to which data values are in the correct range
-    # and format for their domain
+    
+    
+    
     
     with st.expander("D4 — Validity (16%)"):
 
@@ -212,7 +212,7 @@ def show_fault_detection(df):
             IQR = Q3 - Q1
 
             if IQR > 0:
-                # Using 3×IQR (extreme outliers only — not just unusual values)
+                
                 n_out = ((data < Q1 - 3*IQR) | (data > Q3 + 3*IQR)).sum()
                 if n_out > 0:
                     pct = n_out / len(data) * 100
@@ -223,7 +223,7 @@ def show_fault_detection(df):
                         "Severity": "🔴 High" if pct > 5 else "🟡 Low"
                     })
 
-            # Domain-specific impossible values
+            
             c = col.lower()
             if any(k in c for k in ["age", "years"]):
                 bad = ((data < 0) | (data > 150)).sum()
@@ -319,8 +319,8 @@ def show_fault_detection(df):
         _render_dimension("D5 — Accuracy", scores["accuracy"], findings["accuracy"])
 
     
-    # D6 — STRUCTURE (7%)
-    # ISO def: degree to which data follows schema conventions
+    
+    
     
     with st.expander("D6 — Structure (7%)"):
 
@@ -339,9 +339,9 @@ def show_fault_detection(df):
             if pd.to_numeric(df[col], errors="coerce").notnull().mean() > 0.95:
                 wrong_type_cols.append(col)
 
-        # Row/col ratio — very wide datasets are suspicious
+    
         ratio = df.shape[0] / max(df.shape[1], 1)
-        ratio_flag = ratio < 3   # fewer than 3 rows per column
+        ratio_flag = ratio < 3   
 
         total_issues = len(bad_col_names) + len(wrong_type_cols) + len(unnamed_cols)
         struct_pen   = min(total_issues / df.shape[1] * 60, 50)
@@ -365,9 +365,9 @@ def show_fault_detection(df):
         _render_dimension("D6 — Structure", scores["structure"], findings["structure"])
 
     
-    # D7 — CORRELATION / REDUNDANCY (5%)
-    # ISO def: degree to which data is free from redundant
-    # or linearly dependent attributes
+    
+    
+    
    
     with st.expander("D7 — Correlation & Redundancy (5%)"):
 
@@ -414,7 +414,7 @@ def show_fault_detection(df):
         _render_dimension("D7 — Correlation", scores["correlation"], findings["correlation"])
 
     
-    # FINAL DQS
+    
     
     st.divider()
     _render_dqs(scores, findings, df)
@@ -475,7 +475,7 @@ def _render_dqs(scores: dict, findings: dict, df: pd.DataFrame):
         """, unsafe_allow_html=True)
 
     with col2:
-        # Radar chart — much more readable than a bar chart for this
+        
         dims   = list(scores.keys())
         vals   = [scores[d] for d in dims]
         
@@ -495,7 +495,7 @@ def _render_dqs(scores: dict, findings: dict, df: pd.DataFrame):
         )
         st.plotly_chart(fig, use_container_width=True)
 
-    # ── What to fix — prioritised action list 
+    
     st.subheader("📋 What to Fix — Priority Order")
     st.caption("Sorted by impact on your DQS score")
 
@@ -521,7 +521,7 @@ def _render_dqs(scores: dict, findings: dict, df: pd.DataFrame):
     else:
         st.success("🎉 No significant issues found! Your dataset is high quality.")
 
-    #  Dimension breakdown bar 
+    
     fig2 = px.bar(
         x=list(scores.keys()),
         y=list(scores.values()),
